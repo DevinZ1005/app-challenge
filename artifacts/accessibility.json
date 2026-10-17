@@ -1,0 +1,66 @@
+[
+  {
+    "route": "/",
+    "violations": []
+  },
+  {
+    "route": "/find",
+    "violations": []
+  },
+  {
+    "route": "/results",
+    "violations": []
+  },
+  {
+    "route": "/providers/demo-garden",
+    "violations": []
+  },
+  {
+    "route": "/provider/login",
+    "violations": []
+  },
+  {
+    "route": "/how-it-works",
+    "violations": []
+  },
+  {
+    "route": "/privacy",
+    "violations": []
+  },
+  {
+    "route": "/find step 2",
+    "violations": []
+  },
+  {
+    "route": "/find step 3",
+    "violations": []
+  },
+  {
+    "route": "/find step 4",
+    "violations": []
+  },
+  {
+    "route": "/find step 5",
+    "violations": []
+  },
+  {
+    "route": "/find step 6",
+    "violations": []
+  },
+  {
+    "route": "/results expanded",
+    "violations": []
+  },
+  {
+    "route": "/results Español",
+    "violations": []
+  },
+  {
+    "route": "/provider/dashboard authenticated",
+    "violations": []
+  },
+  {
+    "route": "/admin authenticated",
+    "violations": []
+  }
+]

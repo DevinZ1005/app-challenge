@@ -1,0 +1,50 @@
+{
+  "name": "pantryfit",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "import:data": "node --import tsx scripts/import.ts",
+    "test:a11y": "node scripts/accessibility.mjs",
+    "format": "prettier --write src tests e2e scripts docs *.md *.ts *.mjs"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.0",
+    "@supabase/supabase-js": "^2.57.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.9",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.54.0",
+    "tailwindcss": "^4.1.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@electric-sql/pglite": "^0.5.10",
+    "@playwright/test": "^1.55.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.5.9",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  },
+  "type": "module",
+  "overrides": {
+    "postcss": "8.5.30"
+  }
+}

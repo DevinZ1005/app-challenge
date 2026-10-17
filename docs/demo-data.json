@@ -1,0 +1,264 @@
+[
+  {
+    "coordinatesVerified": false,
+    "phone": null,
+    "phoneVerified": false,
+    "demo": true,
+    "source": {
+      "url": null,
+      "name": {
+        "en": "Fictional development fixture — not a real service",
+        "es": "Datos ficticios de desarrollo; no es un servicio real"
+      },
+      "collectedAt": "2026-10-01T12:00:00Z"
+    },
+    "verifiedAt": null,
+    "updatedAt": "2026-10-01T12:00:00Z",
+    "accessibility": null,
+    "id": "demo-garden",
+    "name": {
+      "en": "Garden Table Pantry",
+      "es": "Despensa Mesa del Jardín"
+    },
+    "description": {
+      "en": "A fictional neighborhood pantry demonstrating flexible afternoon pickups and shelf-stable groceries.",
+      "es": "Una despensa ficticia para demostrar recogidas por la tarde y alimentos que no requieren refrigeración."
+    },
+    "address": {
+      "en": "Illustrative location · Bedford Park, Bronx 10468",
+      "es": "Ubicación ilustrativa · Bedford Park, Bronx 10468"
+    },
+    "coordinates": {
+      "lat": 40.873,
+      "lng": -73.891
+    },
+    "program": {
+      "type": "pantry",
+      "hours": [
+        {
+          "day": 1,
+          "start": 780,
+          "end": 1020
+        },
+        {
+          "day": 3,
+          "start": 600,
+          "end": 840
+        },
+        {
+          "day": 5,
+          "start": 540,
+          "end": 720
+        }
+      ],
+      "exceptions": [],
+      "offerings": [
+        {
+          "name": {
+            "en": "Shelf-stable groceries",
+            "es": "Alimentos sin refrigeración"
+          },
+          "equipment": [
+            "none"
+          ],
+          "storage": "shelf",
+          "diets": [
+            "vegetarian",
+            "vegan"
+          ],
+          "verified": true
+        }
+      ],
+      "appointment": "no",
+      "eligibility": null,
+      "eligibilityStatus": "unrestricted"
+    }
+  },
+  {
+    "coordinatesVerified": false,
+    "phone": null,
+    "phoneVerified": false,
+    "demo": true,
+    "source": {
+      "url": null,
+      "name": {
+        "en": "Fictional development fixture — not a real service",
+        "es": "Datos ficticios de desarrollo; no es un servicio real"
+      },
+      "collectedAt": "2026-10-01T12:00:00Z"
+    },
+    "verifiedAt": null,
+    "updatedAt": "2026-10-01T12:00:00Z",
+    "accessibility": null,
+    "id": "demo-community",
+    "name": {
+      "en": "Community Kitchen",
+      "es": "Cocina Comunitaria"
+    },
+    "description": {
+      "en": "A fictional meal program demonstrating ready-to-eat options and evening service.",
+      "es": "Un programa ficticio de comidas para demostrar opciones listas para comer y servicio por la tarde."
+    },
+    "address": {
+      "en": "Illustrative location · Jerome Park, Bronx 10468",
+      "es": "Ubicación ilustrativa · Jerome Park, Bronx 10468"
+    },
+    "coordinates": {
+      "lat": 40.881,
+      "lng": -73.897
+    },
+    "program": {
+      "type": "meals",
+      "hours": [
+        {
+          "day": 0,
+          "start": 1020,
+          "end": 1140
+        },
+        {
+          "day": 2,
+          "start": 1020,
+          "end": 1140
+        },
+        {
+          "day": 4,
+          "start": 1020,
+          "end": 1140
+        }
+      ],
+      "exceptions": [],
+      "offerings": [
+        {
+          "name": {
+            "en": "Ready-to-eat meals",
+            "es": "Comidas listas para comer"
+          },
+          "equipment": [
+            "none"
+          ],
+          "storage": "shelf",
+          "diets": [
+            "vegetarian"
+          ],
+          "verified": true
+        }
+      ],
+      "appointment": "no",
+      "eligibility": null,
+      "eligibilityStatus": "unrestricted"
+    }
+  },
+  {
+    "coordinatesVerified": false,
+    "phone": null,
+    "phoneVerified": false,
+    "demo": true,
+    "source": {
+      "url": null,
+      "name": {
+        "en": "Fictional development fixture — not a real service",
+        "es": "Datos ficticios de desarrollo; no es un servicio real"
+      },
+      "collectedAt": "2026-10-01T12:00:00Z"
+    },
+    "verifiedAt": null,
+    "updatedAt": "2026-10-01T12:00:00Z",
+    "accessibility": null,
+    "id": "demo-neighbors",
+    "name": {
+      "en": "Neighbors Food Collective",
+      "es": "Colectivo de Alimentos Vecinos"
+    },
+    "description": {
+      "en": "A fictional grocery program with refrigerated ingredients that require a stove.",
+      "es": "Un programa ficticio con ingredientes refrigerados que requieren una estufa."
+    },
+    "address": {
+      "en": "Illustrative location · Kingsbridge, Bronx 10468",
+      "es": "Ubicación ilustrativa · Kingsbridge, Bronx 10468"
+    },
+    "coordinates": {
+      "lat": 40.867,
+      "lng": -73.904
+    },
+    "program": {
+      "type": "community",
+      "hours": [
+        {
+          "day": 1,
+          "start": 540,
+          "end": 720
+        },
+        {
+          "day": 4,
+          "start": 600,
+          "end": 840
+        }
+      ],
+      "exceptions": [],
+      "offerings": [
+        {
+          "name": {
+            "en": "Fresh ingredients",
+            "es": "Ingredientes frescos"
+          },
+          "equipment": [
+            "stovetop"
+          ],
+          "storage": "cold",
+          "diets": [],
+          "verified": true
+        }
+      ],
+      "appointment": "yes",
+      "eligibility": {
+        "en": "Service area requirements must be confirmed.",
+        "es": "Confirme los requisitos del área de servicio."
+      },
+      "eligibilityStatus": "unknown"
+    }
+  },
+  {
+    "coordinatesVerified": false,
+    "phone": null,
+    "phoneVerified": false,
+    "demo": true,
+    "source": {
+      "url": null,
+      "name": {
+        "en": "Fictional development fixture — not a real service",
+        "es": "Datos ficticios de desarrollo; no es un servicio real"
+      },
+      "collectedAt": "2026-10-01T12:00:00Z"
+    },
+    "verifiedAt": null,
+    "updatedAt": "2026-10-01T12:00:00Z",
+    "accessibility": null,
+    "id": "demo-harvest",
+    "name": {
+      "en": "Harvest Share",
+      "es": "Cosecha Compartida"
+    },
+    "description": {
+      "en": "A fictional listing demonstrating how PantryFit handles missing hours and unknown food offerings.",
+      "es": "Un registro ficticio que demuestra cómo PantryFit trata horarios y alimentos desconocidos."
+    },
+    "address": {
+      "en": "Illustrative location · University Heights, Bronx 10468",
+      "es": "Ubicación ilustrativa · University Heights, Bronx 10468"
+    },
+    "coordinates": {
+      "lat": 40.861,
+      "lng": -73.908
+    },
+    "program": {
+      "type": "pantry",
+      "hours": null,
+      "exceptions": [],
+      "offerings": null,
+      "appointment": "unknown",
+      "eligibility": null,
+      "eligibilityStatus": "unknown"
+    }
+  }
+]
