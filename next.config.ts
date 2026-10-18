@@ -16,6 +16,10 @@ const config: NextConfig = {
           },
         ],
       },
+      {
+        source: "/api/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
     ];
   },
 };

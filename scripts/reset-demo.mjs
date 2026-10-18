@@ -1,7 +1,9 @@
 import { unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 for (const path of [
-  "/tmp/pantryfit-demo-v1.json",
-  "/tmp/pantryfit-demo-session.key",
+  process.env.PANTRYFIT_DEMO_FILE || join(tmpdir(), "pantryfit-demo-v1.json"),
+  join(tmpdir(), "pantryfit-demo-session.key"),
 ]) {
   try {
     await unlink(path);

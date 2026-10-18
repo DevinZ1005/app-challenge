@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { apiError, checkOrigin, identity, reviewChange } from "@/lib/server";
+import {
+  apiError,
+  checkOrigin,
+  identity,
+  reviewChange,
+  readJson,
+} from "@/lib/server";
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -12,7 +18,7 @@ export async function PATCH(
         status: z.enum(["approved", "rejected"]),
         note: z.string().min(5).max(1000),
       })
-      .parse(await request.json());
+      .parse(await readJson(request));
     return Response.json(
       await reviewChange(who, (await params).id, v.status, v.note),
     );

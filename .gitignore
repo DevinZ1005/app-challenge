@@ -7,3 +7,7 @@ coverage
 playwright-report
 test-results
 *.tsbuildinfo
+.cache
+.tools
+artifacts/*server*.log
+artifacts/*demo.json

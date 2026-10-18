@@ -13,7 +13,6 @@ import {
   type Provider,
 } from "@/lib/model";
 import { dictionaries } from "@/lib/i18n";
-import { demoProviders } from "@/lib/data";
 const Context = createContext<null | {
   locale: Locale;
   setLocale: (l: Locale) => void;
@@ -24,16 +23,19 @@ const Context = createContext<null | {
   demo: boolean;
   demoAuth: boolean;
   loadError: boolean;
+  loading: boolean;
   refresh: () => void;
 }>(null);
 export function AppContext({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>("en");
   const [preferences, setPreferences] = useState(defaultPreferences);
-  const [providers, setProviders] = useState(demoProviders);
-  const [demo, setDemo] = useState(true);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [demo, setDemo] = useState(false);
   const [demoAuth, setDemoAuth] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [loading, setLoading] = useState(true);
   function refresh() {
+    setLoading(true);
     fetch("/api/providers")
       .then((r) => {
         if (!r.ok) throw Error();
@@ -45,7 +47,13 @@ export function AppContext({ children }: { children: ReactNode }) {
         setDemoAuth(d.demoAuth);
         setLoadError(false);
       })
-      .catch(() => setLoadError(true));
+      .catch(() => {
+        setProviders([]);
+        setDemo(false);
+        setDemoAuth(false);
+        setLoadError(true);
+      })
+      .finally(() => setLoading(false));
   }
   useEffect(() => {
     refresh();
@@ -65,6 +73,7 @@ export function AppContext({ children }: { children: ReactNode }) {
         demo,
         demoAuth,
         loadError,
+        loading,
         refresh,
       }}
     >

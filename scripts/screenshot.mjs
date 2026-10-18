@@ -1,7 +1,6 @@
 import { chromium } from "@playwright/test";
 const browser = await chromium.launch({
-  executablePath:
-    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || "/usr/bin/chromium",
+  executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
   headless: true,
   args: ["--no-sandbox"],
 });

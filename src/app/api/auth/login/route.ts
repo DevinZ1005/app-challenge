@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { apiError, checkOrigin, login, rateLimit } from "@/lib/server";
+import {
+  apiError,
+  checkOrigin,
+  login,
+  rateLimit,
+  readJson,
+} from "@/lib/server";
 export async function POST(request: Request) {
   try {
     checkOrigin(request);
@@ -9,7 +15,7 @@ export async function POST(request: Request) {
         email: z.email().max(200),
         password: z.string().min(1).max(200),
       })
-      .parse(await request.json());
+      .parse(await readJson(request));
     rateLimit("login:" + v.email.toLowerCase());
     const token = await login(v.email.toLowerCase(), v.password);
     const response = NextResponse.json({ ok: true });

@@ -1,6 +1,8 @@
-# Development status — 2026-10-17
+# Development status — 2026-10-18
 
 This is a working development prototype. All bundled provider records are fictional; real data verification and production setup remain incomplete.
+
+The October 18 startup-readiness audit, completed code additions, prioritized backlog and source research are in [HANDOFF.md](HANDOFF.md). The engineering follow-up is in [AUDIT.md](AUDIT.md), and current executed results are in [VERIFICATION.md](VERIFICATION.md); the verification table below preserves the October 17 baseline. Use `launch-checklist.json` and `npm run readiness` for the current 29-item handoff. Seven manual public-launch gates remain open. SEC-05 is implemented locally; hosted CI (OPS-01) and development lint advisories (SEC-06) remain pending.
 
 ## Completed
 
@@ -39,7 +41,7 @@ Automated accessibility results do not establish full WCAG conformance. PGlite t
 - **Production onboarding:** organization association and administrator bootstrapping are trusted-operator procedures. Public account registration, invitations, account recovery, and an online access-request/association-review UI remain unimplemented; the provider information page explains manual access. Do not grant ownership based on a claimed name.
 - **Routing/map:** live routing, transit predictions, geocoding and MapLibre are not connected. ZIP/landmark inputs do not calculate travel. Routing inputs must match the exact household origin and verified service destination; otherwise the rule remains unknown. The map control explains the list fallback.
 - **Provider identity edits:** the app supports listing creation and reviewed operational/contact updates. Editing organization identity/address/source after creation is currently a trusted database maintenance task; no general identity-edit form is implemented.
-- **Production security:** add persistent database-backed storage, distributed abuse controls, session refresh/revocation, reviewed CSP, hosting/log-retention review, backups and credential-backed cross-organization testing. Local demo file updates are serialized only within one server process.
+- **Production security:** add persistent database-backed storage, distributed abuse controls, session refresh/revocation, staging review of the nonce-based CSP, hosting/log-retention review, backups and credential-backed cross-organization testing. Production now fails closed without full configuration or explicit fictional-demo opt-in. Local demo file updates are serialized only within one server process. Apply migration 004 after the existing migrations; fictional records cannot gain real-world verification flags.
 - **Eligibility:** restrictions are displayed for confirmation. Sensitive household eligibility facts are not collected or inferred.
 - **Verification:** demo evidence actions remain fictional and do not create real verification dates. Supabase field verification is recorded separately from approval; provider-submitted changes clear affected verification confidence.
 - **User validation:** bilingual human review, keyboard/screen-reader/zoom tests, older phones/slow connections, consent-based community research, a recorded demo video and factual competition submissions remain to be completed.

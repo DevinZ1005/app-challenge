@@ -1,0 +1,404 @@
+{
+  "checkedAt": "2026-10-18T06:52:22.565Z",
+  "scope": "Checks handoff integrity and evidence file existence. Does not run tests or prove behavior, deployment, security, or accessibility conformance.",
+  "releaseApproved": false,
+  "implementationEvidenceValid": true,
+  "unresolvedReleaseBlockers": [
+    "LAUNCH-01",
+    "LAUNCH-02",
+    "LAUNCH-03",
+    "LAUNCH-04",
+    "LAUNCH-05",
+    "LAUNCH-06",
+    "LAUNCH-07"
+  ],
+  "results": [
+    {
+      "id": "PRODUCT-01",
+      "status": "implemented",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Anonymous household matching and reviewed provider updates define the core value.",
+      "evidence": [
+        "README.md",
+        "src/lib/matching.ts",
+        "e2e/pantryfit.spec.ts"
+      ],
+      "acceptance": "Household completes questionnaire, understands uncertainty, edits answers; provider submission becomes public only after admin approval.",
+      "errors": []
+    },
+    {
+      "id": "UX-01",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Responsive navigation, labels, validation, and empty results are present.",
+      "evidence": [
+        "src/components/questionnaire.tsx",
+        "src/components/results.tsx",
+        "src/components/shell.tsx"
+      ],
+      "acceptance": "Mobile journey has no horizontal overflow; invalid entries explain corrections; no matches has a useful path forward.",
+      "errors": []
+    },
+    {
+      "id": "UX-02",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Added loading, route/root recovery and explicit data failure states without fictional fallback.",
+      "evidence": [
+        "src/app/loading.tsx",
+        "src/app/error.tsx",
+        "src/app/global-error.tsx",
+        "src/components/context.tsx",
+        "tests/context.test.tsx"
+      ],
+      "acceptance": "A failed data request clears listings, exposes retry, and preserves household input; root errors have bilingual recovery.",
+      "errors": []
+    },
+    {
+      "id": "UX-03",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "English/Spanish dictionaries and state-preserving language switching exist.",
+      "evidence": [
+        "src/lib/i18n.ts",
+        "tests/i18n.test.ts",
+        "e2e/pantryfit.spec.ts"
+      ],
+      "acceptance": "Dictionary keys match and switching languages preserves questionnaire answers.",
+      "errors": []
+    },
+    {
+      "id": "SEC-01",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Privileged operations validate session, membership, role, and database policies.",
+      "evidence": [
+        "src/lib/server.ts",
+        "supabase/migrations/001_pantryfit.sql",
+        "tests/database.test.ts"
+      ],
+      "acceptance": "Anonymous and unrelated providers cannot mutate data; non-admins cannot approve or self-promote.",
+      "errors": []
+    },
+    {
+      "id": "SEC-02",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Added bounded JSON parsing, consistent errors, private API cache controls, request IDs, and retry guidance.",
+      "evidence": [
+        "src/lib/http.ts",
+        "tests/http.test.ts",
+        "e2e/launch.spec.ts"
+      ],
+      "acceptance": "Malformed JSON returns 400; non-JSON 415; oversized actual streams 413; error bodies and logs omit secrets.",
+      "errors": []
+    },
+    {
+      "id": "SEC-03",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Added fail-closed production configuration; partial configuration always fails.",
+      "evidence": [
+        "src/lib/runtime.ts",
+        ".env.example",
+        "tests/http.test.ts"
+      ],
+      "acceptance": "Production without Supabase rejects data/auth requests unless explicitly opted into a fictional demonstration.",
+      "errors": []
+    },
+    {
+      "id": "SEC-04",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Security headers and nonce-based script CSP are configured and exercised on the production build; inline styles remain permitted.",
+      "evidence": [
+        "next.config.ts",
+        "src/middleware.ts",
+        "scripts/smoke-production.mjs",
+        "docs/SECURITY.md"
+      ],
+      "acceptance": "Framing and object embedding are blocked; CSP permits actual app functionality; API responses are no-store.",
+      "errors": []
+    },
+    {
+      "id": "DATA-01",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Versioned migrations, fixture validation, transactional review, and audit trail exist.",
+      "evidence": [
+        "supabase/migrations/003_validate_proposals.sql",
+        "supabase/migrations/004_verification_boundaries.sql",
+        "scripts/import.ts",
+        "tests/database.test.ts"
+      ],
+      "acceptance": "Invalid data fails validation and provider statements do not grant independent verification.",
+      "errors": []
+    },
+    {
+      "id": "PRIVACY-01",
+      "status": "implemented",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Household information stays in memory; a browser regression verifies matching sends only a public data GET and writes no browser storage.",
+      "evidence": [
+        "src/components/context.tsx",
+        "src/app/privacy/page.tsx",
+        "src/lib/i18n.ts",
+        "e2e/pantryfit.spec.ts"
+      ],
+      "acceptance": "Household answers and rounded location are not sent to backend or written to browser storage.",
+      "errors": []
+    },
+    {
+      "id": "QA-01",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Automated unit, database, browser, and accessibility tests exist.",
+      "evidence": [
+        "tests/matching.test.ts",
+        "tests/database.test.ts",
+        "e2e/launch.spec.ts",
+        "scripts/accessibility.mjs"
+      ],
+      "acceptance": "Run the documented commands successfully; test source existence alone is insufficient.",
+      "errors": []
+    },
+    {
+      "id": "OPS-01",
+      "status": "pending",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "CI/dependency-update configuration and local locked checks are present. The private project repository was identified during Git publication, but hosted CI execution and branch-protection evidence remain unverified. The acceptance criterion explicitly requires a CI run.",
+      "evidence": [
+        ".github/workflows/quality.yml",
+        ".github/dependabot.yml",
+        "package.json",
+        "package-lock.json"
+      ],
+      "acceptance": "Fresh checkout installs locked dependencies and passes typecheck, lint, tests, build, audit, and browser checks in CI.",
+      "errors": []
+    },
+    {
+      "id": "OPS-02",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Added a noncached readiness endpoint and sanitized server failure events.",
+      "evidence": [
+        "src/app/api/health/route.ts",
+        "src/lib/http.ts",
+        "docs/OPERATIONS.md"
+      ],
+      "acceptance": "Health returns 200 only when public data can be read, otherwise 503 without configuration details.",
+      "errors": []
+    },
+    {
+      "id": "DISCOVERY-01",
+      "status": "implemented",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Metadata and robots keep fictional directory pages out of intentional indexing.",
+      "evidence": [
+        "src/app/layout.tsx",
+        "src/app/robots.ts"
+      ],
+      "acceptance": "Robots disallows crawling and metadata is noindex; this does not replace authorization.",
+      "errors": []
+    },
+    {
+      "id": "SUPPORT-01",
+      "status": "implemented",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Feedback submission and administrator review are present.",
+      "evidence": [
+        "src/components/info.tsx",
+        "src/app/api/feedback/route.ts",
+        "src/components/dashboard.tsx"
+      ],
+      "acceptance": "Anonymous report is visible only to admins; network errors do not claim success.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-01",
+      "status": "pending",
+      "owner": "Data lead + bilingual reviewer",
+      "releaseBlocker": true,
+      "reason": "All bundled locations are fictional; source research is not field verification.",
+      "evidence": [
+        "docs/DATA.md"
+      ],
+      "acceptance": "Verify a small real service cohort, source provenance, contact, hours, offerings, restrictions and translated content; record who checked each field and when.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-02",
+      "status": "pending",
+      "owner": "Engineering lead",
+      "releaseBlocker": true,
+      "reason": "Live Supabase credentials and a deployed staging environment are unavailable.",
+      "evidence": [
+        "docs/DEPLOYMENT.md"
+      ],
+      "acceptance": "Apply migrations in staging, test anonymous/provider/admin/nonmember roles with real Auth sessions and HTTPS cookies, then run the public workflow against the release candidate.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-03",
+      "status": "pending",
+      "owner": "Security + platform lead",
+      "releaseBlocker": true,
+      "reason": "Per-process throttling does not protect multiple instances or direct Supabase RPC access; session lifecycle remains limited.",
+      "evidence": [
+        "docs/SECURITY.md"
+      ],
+      "acceptance": "Prove shared limits on login, feedback, and changes including direct RPC; test session expiry/revocation and operator-supported recovery; validate proxy origin settings and CSP on staging.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-04",
+      "status": "pending",
+      "owner": "Platform lead",
+      "releaseBlocker": true,
+      "reason": "A health route and runbook do not configure external monitoring or backups.",
+      "evidence": [
+        "docs/OPERATIONS.md"
+      ],
+      "acceptance": "Connect uptime/error alerts to a named owner, configure backup retention and spend alerts, restore to staging and rehearse rollback with recorded recovery times.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-05",
+      "status": "pending",
+      "owner": "Product + accessibility reviewer",
+      "releaseBlocker": true,
+      "reason": "Automation cannot establish usability or full WCAG conformance.",
+      "evidence": [
+        "docs/TESTING.md"
+      ],
+      "acceptance": "Complete keyboard, screen-reader, 200/400 percent zoom, Spanish review, older-phone and slow-network tasks with representative consenting users; fix critical barriers.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-06",
+      "status": "pending",
+      "owner": "Founder + privacy reviewer",
+      "releaseBlocker": true,
+      "reason": "Real operator identity, support ownership, retention and jurisdiction-specific policy decisions are unknown.",
+      "evidence": [
+        "docs/OPERATIONS.md",
+        "docs/HANDOFF.md"
+      ],
+      "acceptance": "Name support/security/privacy contacts; approve actual hosting/log/feedback retention and deletion procedures; review operator policies for the launch context and publish accurate contact details.",
+      "errors": []
+    },
+    {
+      "id": "LAUNCH-07",
+      "status": "pending",
+      "owner": "Founder + product lead",
+      "releaseBlocker": true,
+      "reason": "No observed user validation or production capacity evidence supports launch yet.",
+      "evidence": [
+        "docs/HANDOFF.md"
+      ],
+      "acceptance": "Record pilot task success and failure reasons, measure release-candidate performance, capacity and cost, then record go/no-go with each blocker closed and evidence attached.",
+      "errors": []
+    },
+    {
+      "id": "GROWTH-01",
+      "status": "pending",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Product outcomes should first be measured through consent-based pilot research.",
+      "evidence": [
+        "docs/HANDOFF.md"
+      ],
+      "acceptance": "Collect completion, comprehension, verified-service accuracy, and successful referral outcomes without retaining household answers or precise location.",
+      "errors": []
+    },
+    {
+      "id": "SEC-05",
+      "status": "implemented",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Fresh per-request nonces authorize framework scripts without script unsafe-inline; production browser checks cover injection blocking, hydration and navigation. Staging proxy validation remains LAUNCH-03.",
+      "evidence": [
+        "src/middleware.ts",
+        "src/app/layout.tsx",
+        "scripts/smoke-production.mjs",
+        "docs/VERIFICATION.md"
+      ],
+      "acceptance": "Adopt a rendering-compatible nonce/hash CSP, remove unsafe-inline for scripts, and verify navigation and hydration on the release build.",
+      "errors": []
+    },
+    {
+      "id": "SEC-06",
+      "status": "pending",
+      "owner": "Engineering + security reviewer",
+      "releaseBlocker": false,
+      "reason": "Vitest was upgraded to remove critical/moderate test-tool findings. Five high development-only findings remain in the Next ESLint/braces dependency chain; the underlying advisory lists no patched braces version.",
+      "evidence": [
+        "package.json",
+        "package-lock.json",
+        "docs/SECURITY.md",
+        "docs/VERIFICATION.md"
+      ],
+      "acceptance": "Review actual development/CI exposure and adopt a patched compatible lint dependency chain, or document a reviewed replacement and residual risk; rerun full dependency audit and all quality checks. Do not mistake production-only audit success for a clean full audit.",
+      "errors": []
+    },
+    {
+      "id": "SCALE-01",
+      "status": "pending",
+      "owner": "Engineering",
+      "releaseBlocker": false,
+      "reason": "Self-service invitations, password recovery and refreshed sessions improve provider experience after the private pilot.",
+      "evidence": [
+        "docs/DEPLOYMENT.md"
+      ],
+      "acceptance": "Implement verified membership invitations and recovery with expiration, revocation, enumeration resistance, and cross-organization tests before self-service rollout.",
+      "errors": []
+    },
+    {
+      "id": "OPTIONAL-01",
+      "status": "not-applicable",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Billing, subscriptions, carts and payments have no role in this free directory.",
+      "evidence": [],
+      "acceptance": "Reassess only if an approved business model introduces money movement.",
+      "errors": []
+    },
+    {
+      "id": "OPTIONAL-02",
+      "status": "not-applicable",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Household accounts, advertising, push/email marketing and social login are unnecessary for anonymous matching.",
+      "evidence": [],
+      "acceptance": "Add only for a validated user need with privacy and lifecycle requirements.",
+      "errors": []
+    },
+    {
+      "id": "OPTIONAL-03",
+      "status": "not-applicable",
+      "owner": "Product",
+      "releaseBlocker": false,
+      "reason": "Offline caches, native packaging and live maps are deferred; stale food-service information can mislead.",
+      "evidence": [
+        "README.md"
+      ],
+      "acceptance": "Maintain honest list fallback; require verified routing inputs and freshness design before introducing offline or maps.",
+      "errors": []
+    }
+  ]
+}

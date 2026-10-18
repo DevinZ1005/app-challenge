@@ -7,6 +7,8 @@ const config = [
       ".next/**",
       ".next-dev/**",
       "node_modules/**",
+      ".cache/**",
+      ".tools/**",
       "artifacts/**",
       "test-results/**",
       "playwright-report/**",

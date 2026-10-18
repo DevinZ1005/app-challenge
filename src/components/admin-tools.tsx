@@ -35,15 +35,19 @@ export function AdminTools({
       setMessage(t.saveError);
       return;
     }
-    const r = await fetch("/api/providers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(v.data),
-    });
-    setMessage(r.ok ? t.saved : t.saveError);
-    if (r.ok) {
-      form.reset();
-      onSaved();
+    try {
+      const r = await fetch("/api/providers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(v.data),
+      });
+      setMessage(r.ok ? t.saved : t.saveError);
+      if (r.ok) {
+        form.reset();
+        onSaved();
+      }
+    } catch {
+      setMessage(t.saveError);
     }
   }
   async function verify(e: React.FormEvent) {
@@ -58,21 +62,25 @@ export function AdminTools({
       setMessage(t.saveError);
       return;
     }
-    const r = await fetch("/api/verification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(v.data),
-    });
-    setMessage(
-      r.ok
-        ? locale === "en"
-          ? "Review action recorded."
-          : "Acción de revisión registrada."
-        : t.saveError,
-    );
-    if (r.ok) {
-      setNotes("");
-      onSaved();
+    try {
+      const r = await fetch("/api/verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(v.data),
+      });
+      setMessage(
+        r.ok
+          ? locale === "en"
+            ? "Review action recorded."
+            : "Acción de revisión registrada."
+          : t.saveError,
+      );
+      if (r.ok) {
+        setNotes("");
+        onSaved();
+      }
+    } catch {
+      setMessage(t.saveError);
     }
   }
   return (

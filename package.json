@@ -2,6 +2,9 @@
   "name": "pantryfit",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.12 <25"
+  },
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
@@ -9,7 +12,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:production": "node scripts/smoke-production.mjs",
     "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint && npm test && npm run readiness && npm run build",
+    "readiness": "node scripts/readiness.mjs",
+    "readiness:release": "node scripts/readiness.mjs --release",
     "import:data": "node --import tsx scripts/import.ts",
     "test:a11y": "node scripts/accessibility.mjs",
     "format": "prettier --write src tests e2e scripts docs *.md *.ts *.mjs"
@@ -41,7 +48,7 @@
     "prettier": "^3.9.10",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
-    "vitest": "^3.2.0"
+    "vitest": "^4.1.11"
   },
   "type": "module",
   "overrides": {

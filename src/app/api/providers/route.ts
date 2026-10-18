@@ -5,6 +5,7 @@ import {
   identity,
   checkOrigin,
   createListing,
+  readJson,
 } from "@/lib/server";
 export const dynamic = "force-dynamic";
 export async function GET() {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   try {
     checkOrigin(request);
     return Response.json(
-      await createListing(await identity(), await request.json()),
+      await createListing(await identity(), await readJson(request)),
       { status: 201 },
     );
   } catch (e) {

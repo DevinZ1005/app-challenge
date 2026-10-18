@@ -16,6 +16,7 @@ beforeAll(async () => {
     "001_pantryfit.sql",
     "002_admin_tools.sql",
     "003_validate_proposals.sql",
+    "004_verification_boundaries.sql",
   ]) {
     const sql = await readFile("supabase/migrations/" + f, "utf8");
     await db.exec(sql.replace("create extension if not exists pgcrypto;", ""));
@@ -190,5 +191,141 @@ it("rejects malformed proposals sent directly to the database", async () => {
         ],
       ),
     ).rejects.toThrow();
+  });
+});
+
+it("keeps fictional seed records unverified after an administrator review", async () => {
+  await asUser(admin, async () => {
+    await db.query("select public.record_verification($1,$2,$3,$4)", [
+      program,
+      "official_source",
+      ["hours", "offerings", "eligibility", "coordinates", "phone"],
+      "Reviewed fictional fixture for regression testing only",
+    ]);
+  });
+  const result = await db.query<{
+    document: {
+      demo: boolean;
+      verifiedAt: string | null;
+      coordinatesVerified: boolean;
+      phoneVerified: boolean;
+    };
+  }>("select document from public.public_provider_documents");
+  expect(result.rows[0].document).toMatchObject({
+    demo: true,
+    verifiedAt: null,
+    coordinatesVerified: false,
+    phoneVerified: false,
+  });
+});
+
+it.each([
+  { programId: null },
+  { offerings: [{ ...payload().offerings[0], equipment: [null] }] },
+  { offerings: [{ ...payload().offerings[0], diets: [null] }] },
+])("rejects JSON nulls in required proposal values: %j", async (patch) => {
+  await asUser(provider, async () => {
+    await expect(
+      db.query(
+        "insert into public.change_requests(program_id,submitted_by,payload) values ($1,$2,$3)",
+        [program, provider, { ...payload(), ...patch }],
+      ),
+    ).rejects.toThrow();
+  });
+});
+
+it("protects verification RPCs, supports synthetic real-record verification, and clears outdated flags", async () => {
+  const listing = {
+    name: { en: "Synthetic SQL test", es: "Prueba SQL sintética" },
+    description: { en: "Isolated test only", es: "Solo prueba aislada" },
+    address: { en: "Test location", es: "Ubicación de prueba" },
+    zip: "10468",
+    lat: 40.87,
+    lng: -73.89,
+    type: "pantry",
+    sourceName: { en: "Test source", es: "Fuente de prueba" },
+    sourceUrl: "https://example.test/source",
+    collectedAt: new Date().toISOString(),
+  };
+  for (const user of [null, outsider, provider]) {
+    await asUser(user, async () => {
+      await expect(
+        db.query("select public.create_listing($1)", [listing]),
+      ).rejects.toThrow();
+      await expect(
+        db.query("select public.record_verification($1,$2,$3,$4)", [
+          program,
+          "official_source",
+          ["coordinates"],
+          "Unauthorized verification attempt",
+        ]),
+      ).rejects.toThrow();
+    });
+  }
+  await asUser(admin, async () => {
+    const created = await db.query<{ id: string }>(
+      "select public.create_listing($1) as id",
+      [listing],
+    );
+    const id = created.rows[0].id;
+    await db.query("select public.record_verification($1,$2,$3,$4)", [
+      id,
+      "official_source",
+      ["coordinates"],
+      "Synthetic regression evidence only",
+    ]);
+    const read = async () =>
+      (
+        await db.query<{
+          document: { verifiedAt: string | null; coordinatesVerified: boolean };
+        }>(
+          "select document from public.public_provider_documents where document->>'id'=$1",
+          [id],
+        )
+      ).rows[0].document;
+    expect(await read()).toMatchObject({
+      verifiedAt: null,
+      coordinatesVerified: true,
+    });
+    await db.query("select public.record_verification($1,$2,$3,$4)", [
+      id,
+      "flag_outdated",
+      [],
+      "Synthetic regression invalidation only",
+    ]);
+    expect(await read()).toMatchObject({
+      verifiedAt: null,
+      coordinatesVerified: false,
+    });
+    await expect(
+      db.query("select public.record_verification($1,$2,$3,$4)", [
+        id,
+        "official_source",
+        [null],
+        "Invalid null verification field",
+      ]),
+    ).rejects.toThrow();
+  });
+});
+
+it("keeps anonymous feedback private and rejects short reports", async () => {
+  await asUser(null, async () => {
+    await db.query("select public.submit_feedback($1)", [
+      "Synthetic private feedback regression",
+    ]);
+    await expect(db.query("select * from public.feedback")).rejects.toThrow();
+    await expect(
+      db.query("select public.submit_feedback('bad')"),
+    ).rejects.toThrow();
+  });
+  await asUser(provider, async () => {
+    expect((await db.query("select * from public.feedback")).rows).toHaveLength(
+      0,
+    );
+  });
+  await asUser(admin, async () => {
+    expect((await db.query("select * from public.feedback")).rows).toHaveLength(
+      1,
+    );
   });
 });

@@ -196,11 +196,18 @@ function MatchCard({ result }: { result: MatchResult }) {
   );
 }
 export function Results() {
-  const { t, preferences, providers } = useApp();
+  const { t, preferences, providers, loading, loadError } = useApp();
   const [type, setType] = useState("all");
   const [sort, setSort] = useState("quality");
   const [possible, setPossible] = useState(true);
   const [view, setView] = useState("list");
+  if (loading || loadError)
+    return (
+      <section className="container page-space" role="status">
+        <h1>{t.resultsTitle}</h1>
+        <p>{loading ? t.loading : t.error}</p>
+      </section>
+    );
   const matches = rankProviders(preferences, providers);
   let filtered = matches.filter(
     (r) =>
@@ -326,7 +333,13 @@ export function Results() {
   );
 }
 export function ProviderDetail({ id }: { id: string }) {
-  const { t, locale, providers, preferences } = useApp();
+  const { t, locale, providers, preferences, loading, loadError } = useApp();
+  if (loading || loadError)
+    return (
+      <section className="container page-space" role="status">
+        <p>{loading ? t.loading : t.error}</p>
+      </section>
+    );
   const p = providers.find((v) => v.id === id);
   if (!p)
     return (

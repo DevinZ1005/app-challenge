@@ -3,6 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 import { readFile, writeFile, rename } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { HttpError } from "./http";
+import { assertRuntimeConfiguration } from "./runtime";
+export { HttpError, apiError, readJson } from "./http";
 import { demoProviders } from "./data";
 import type { Provider } from "./model";
 import { listingSchema, verificationSchema } from "./listings";
@@ -10,7 +15,7 @@ import { updateSchema, type ChangeRequest, type AuditEntry } from "./updates";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 export const isDemo = !url && !anon;
-const keyFile = "/tmp/pantryfit-demo-session.key";
+const keyFile = join(tmpdir(), "pantryfit-demo-session.key");
 async function sessionSecret() {
   try {
     return await readFile(keyFile);
@@ -24,7 +29,8 @@ async function sessionSecret() {
     return readFile(keyFile);
   }
 }
-const file = process.env.PANTRYFIT_DEMO_FILE || "/tmp/pantryfit-demo-v1.json";
+const file =
+  process.env.PANTRYFIT_DEMO_FILE || join(tmpdir(), "pantryfit-demo-v1.json");
 export type Identity = {
   id: string;
   email: string;
@@ -32,15 +38,8 @@ export type Identity = {
   programIds: string[];
   token?: string;
 };
-export class HttpError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
 export function supabase(token?: string) {
+  assertRuntimeConfiguration();
   if (!url || !anon)
     throw new HttpError(503, "Supabase configuration incomplete");
   return createClient(url, anon, {
@@ -56,6 +55,7 @@ async function sign(value: string) {
     .digest("hex");
 }
 export async function login(email: string, password: string) {
+  assertRuntimeConfiguration();
   if (isDemo) {
     if (
       password !== "PantryFit-demo-2026" ||
@@ -77,6 +77,7 @@ export async function login(email: string, password: string) {
   return data.session.access_token;
 }
 export async function identity(): Promise<Identity> {
+  assertRuntimeConfiguration();
   const token = (await cookies()).get("pantryfit-session")?.value;
   if (!token) throw new HttpError(401, "Authentication required");
   if (isDemo) {
@@ -148,6 +149,7 @@ interface DemoStore {
   feedback?: Feedback[];
 }
 async function readStore(): Promise<DemoStore> {
+  assertRuntimeConfiguration();
   try {
     return JSON.parse(await readFile(file, "utf8"));
   } catch (e) {
@@ -349,17 +351,6 @@ export function rateLimit(key: string) {
     return;
   }
   if (++a.count > 10) throw new HttpError(429, "Try again later");
-}
-export function apiError(e: unknown) {
-  if (e instanceof HttpError)
-    return Response.json({ error: e.message }, { status: e.status });
-  if (e && typeof e === "object" && "issues" in e)
-    return Response.json({ error: "Invalid input" }, { status: 400 });
-  console.error(
-    "PantryFit request failed",
-    e instanceof Error ? e.message : "Unknown error",
-  );
-  return Response.json({ error: "Request failed" }, { status: 500 });
 }
 
 export async function createListing(who: Identity, raw: unknown) {

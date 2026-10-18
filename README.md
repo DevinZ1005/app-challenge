@@ -4,11 +4,13 @@
 
 PantryFit compares household schedules, travel limits, cooking equipment, refrigeration, and dietary needs with documented services. It explains both compatibility and missing information. No household account is required.
 
+Start with the [startup PM handoff](docs/HANDOFF.md), [requirement matrix](docs/launch-checklist.json), [current verification](docs/VERIFICATION.md), and [operations runbook](docs/OPERATIONS.md). The handoff includes research sources, acceptance criteria, priorities, owners, and explicit public-launch blockers.
+
 > All built-in services are fictional. Do not visit their illustrative locations. No real organizations, partnerships, interviews, or impact statistics are claimed.
 
 ## Run locally
 
-Use Node.js 22 or 24 and npm. From this directory:
+Use Node.js 22.12 or newer in the 22/24 lines and npm. From this directory:
 
 ```sh
 npm ci
@@ -27,7 +29,11 @@ npm run build
 npm start
 ```
 
-An existing Chromium installation can be used with `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chromium npm run test:e2e`. The browser tests use a local development server. Unit tests include the matching engine, a questionnaire component, dictionary completeness, and PostgreSQL authorization through PGlite when installed. The production Supabase service must still be tested with real project credentials.
+`npm run check` runs types, lint, unit/database tests, handoff evidence checks, and the production build. `npm run readiness` validates checklist integrity and source-file evidence; it does not run behavioral tests. `npm run readiness:release` additionally fails while manual launch blockers remain open. CI also runs browser/accessibility checks and the production dependency audit.
+
+Production without Supabase fails closed. To run a **fictional production demo** with `npm start`, explicitly set `PANTRYFIT_ALLOW_DEMO=true` in the server environment. Local `npm run dev` needs no variables. Partial database configuration always fails.
+
+An existing Chromium installation can be used with `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chromium npm run test:e2e`. Browser tests start their own fictional development server on port 3102 with a unique temporary data file and refuse to reuse an existing server. Unit tests include the matching engine, a questionnaire component, dictionary completeness, and PostgreSQL authorization through PGlite. The production Supabase service must still be tested with real project credentials.
 
 ## Demonstrate the provider workflow
 
@@ -44,24 +50,24 @@ In demo mode only:
 4. Reopen `/results` or the provider details to see approved changes. Review audit history in the dashboard.
 5. Administrators can add listings, record evidence, flag stale records, and review feedback.
 
-These public credentials are a **fictional sandbox**, not production authentication. Demo sessions use signed HTTP-only, SameSite cookies. Only provider/admin demo records are stored in `/tmp/pantryfit-demo-v1.json`; preferences are never stored. Run `node scripts/reset-demo.mjs` while the server is stopped to reset demo records and sessions. The demo store is suitable for one local server process, not a multi-instance production database.
+These public credentials are a **fictional sandbox**, not production authentication. Demo sessions use signed HTTP-only, SameSite cookies. Only provider/admin demo records are stored in the operating system's temporary directory as `pantryfit-demo-v1.json`; preferences are never stored. Run `node scripts/reset-demo.mjs` while the server is stopped to reset demo records and sessions. The demo store is suitable for one local server process, not a multi-instance production database.
 
 ## Architecture and files
 
-| Path                   | Purpose                                                               |
-| ---------------------- | --------------------------------------------------------------------- |
-| `src/app/`             | Next.js App Router pages, layout, and server API routes               |
-| `src/components/`      | Responsive public UI, bilingual questionnaire, results, dashboards    |
-| `src/lib/model.ts`     | Typed matching contracts and Zod household validation                 |
-| `src/lib/matching.ts`  | Deterministic reference matching algorithm                            |
-| `src/lib/i18n.ts`      | English/Spanish dictionary used by shared components                  |
-| `src/lib/server.ts`    | Server authorization, demo storage, Supabase access                   |
-| `src/lib/updates.ts`   | Shared provider submission validation                                 |
-| `supabase/migrations/` | Normalized PostgreSQL schema, policies, review transactions           |
-| `supabase/seed.sql`    | Clearly fictional Supabase seed                                       |
-| `scripts/import.ts`    | JSON import validation; no automatic publication                      |
-| `tests/`, `e2e/`       | Unit, component, database-policy, and browser tests                   |
-| `docs/`                | Architecture, data research, deployment, demo script |
+| Path                   | Purpose                                                            |
+| ---------------------- | ------------------------------------------------------------------ |
+| `src/app/`             | Next.js App Router pages, layout, and server API routes            |
+| `src/components/`      | Responsive public UI, bilingual questionnaire, results, dashboards |
+| `src/lib/model.ts`     | Typed matching contracts and Zod household validation              |
+| `src/lib/matching.ts`  | Deterministic reference matching algorithm                         |
+| `src/lib/i18n.ts`      | English/Spanish dictionary used by shared components               |
+| `src/lib/server.ts`    | Server authorization, demo storage, Supabase access                |
+| `src/lib/updates.ts`   | Shared provider submission validation                              |
+| `supabase/migrations/` | Normalized PostgreSQL schema, policies, review transactions        |
+| `supabase/seed.sql`    | Clearly fictional Supabase seed                                    |
+| `scripts/import.ts`    | JSON import validation; no automatic publication                   |
+| `tests/`, `e2e/`       | Unit, component, database-policy, and browser tests                |
+| `docs/`                | Architecture, data research, deployment, demo script               |
 
 Next.js + React + strict TypeScript, Tailwind CSS with a custom visual system, Lucide, React Hook Form, Zod, Supabase PostgreSQL/Auth/RLS, Vitest, React Testing Library, Playwright. A small typed dictionary replaces next-intl to keep language switching and in-memory forms simple. Recommendations use deterministic rules.
 
@@ -98,4 +104,3 @@ A standard Next.js Node build is prepared for Vercel. See [docs/DEPLOYMENT.md](d
 - Independent verification is recorded by field; the summary freshness timestamp requires hours, offerings, and eligibility confirmation together. Availability of food on a particular day is never guaranteed.
 - The schema supports multiple programs per organization; the public app renders each program as a separate service card. The initial UI supports English/Spanish text; third languages need an additional dictionary and reviewed provider translations.
 - Automated accessibility scans and browser testing support, but do not replace, keyboard, screen-reader, bilingual, and low-end-device testing with local users. See `docs/STATUS.md` for executed checks and remaining review items.
-

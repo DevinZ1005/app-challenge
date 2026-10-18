@@ -10,11 +10,17 @@ npm run test:e2e
 npm run build
 ```
 
+Current executed results and environment details are in [VERIFICATION.md](VERIFICATION.md). `npm run check` combines types, lint, Vitest, checklist evidence validation and build. `npm run readiness:release` deliberately fails while manual public-launch gates remain pending; it cannot certify a release.
+
+After building and installing Chromium, `npm run test:production` starts isolated production servers on port 3101 (override `SMOKE_PORT` if necessary), verifies unconfigured fail-closed and explicit fictional-demo behavior, and stops them. Production Chromium also checks fresh script nonces, policy override resistance, blocked untrusted HTML scripts, hydration, language switching, matching, details and editing through client navigation. The script overrides Supabase variables to blank and uses a dedicated temporary data directory. It does not exercise real Supabase credentials.
+
 Unit tests exercise 30 matching cases, including schedule conflict versus proximity, refrigeration, microwave-only use, unknown food/hours/diets, stale records, ranking, no suitable providers, joint hard constraints, interval endpoints, exceptional closures, deterministic ties, unavailable/unreliable travel, malformed inputs/timestamps, DST/local-day conversion, and configurable scoring. An RTL component test checks questionnaire input retention and labeling; dictionary tests check bilingual key completeness.
 
-Seven embedded PostgreSQL/PGlite tests load the actual SQL migrations with a small Auth-role stub, then exercise RLS and review functions. PGlite's built-in UUID implementation replaces the `pgcrypto` extension setup. This validates database logic locally but is not a live Supabase integration test.
+Thirteen embedded PostgreSQL/PGlite tests load all four SQL migrations with a small Auth-role stub. They exercise RLS, review transactions, null input rejection, fictional verification boundaries, synthetic real-record verification/invalidation and feedback privacy. PGlite's built-in UUID implementation replaces the `pgcrypto` extension setup. These synthetic tests validate database logic locally and do not verify a real service or live Supabase integration.
 
-Three Playwright browser journeys cover bilingual questionnaire/results/detail/editing behavior, mobile validation/navigation, and authenticated provider form submission plus admin form approval. They also directly challenge API authorization boundaries. Browser tests freeze the household evaluation date for reproducibility and reset only the local fictional demo store. Use an isolated local demo, not a real configured directory.
+Seven Playwright tests cover bilingual questionnaire/results/detail/editing behavior, mobile validation/navigation, household network/storage privacy and reload clearing, feedback failure/retry/admin visibility, authenticated provider form submission plus admin approval, API launch safeguards, and automated accessibility across nine public routes plus a Spanish questionnaire state. They challenge authorization, cross-origin writes, malformed/oversized bodies, health, crawler exclusion, headers and private cache controls. Browser journey tests freeze the household evaluation date. The suite creates its own fictional server on port 3102, blanks inherited database settings, uses a unique temporary data file and cleans up that file. It refuses to reuse an existing server and never resets the shared developer demo file.
+
+Additional regression tests cover bounded/chunked request streams, configuration fail-closed behavior, sanitized error logging and provider-load failure/retry with preferences preserved. These supplement the original matcher/database/component/dictionary tests.
 
 ```sh
 # Optional use of a system browser:

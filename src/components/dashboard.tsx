@@ -521,21 +521,27 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
   }, []);
   async function review(id: string, status: "approved" | "rejected") {
     setMessage("");
-    const r = await fetch("/api/changes/" + id, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, note: reviewNotes[id] || "" }),
-    });
-    if (!r.ok) {
+    try {
+      const r = await fetch("/api/changes/" + id, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, note: reviewNotes[id] || "" }),
+      });
+      if (!r.ok) throw Error();
+      refresh();
+      load();
+    } catch {
       setMessage(t.saveError);
-      return;
     }
-    refresh();
-    load();
   }
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/provider/login");
+    try {
+      const r = await fetch("/api/auth/logout", { method: "POST" });
+      if (!r.ok) throw Error();
+      router.push("/provider/login");
+    } catch {
+      setMessage(t.error);
+    }
   }
   if (!loaded)
     return (
