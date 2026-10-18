@@ -139,6 +139,8 @@ function ProgramForm({
     setMessage("");
     const parsed = updateSchema.safeParse({
       programId: provider.id,
+      baseRevision: provider.revision || 0,
+      baseOrganizationRevision: provider.organizationRevision || 0,
       hours: hours.length ? hours : null,
       exceptions,
       offerings,
@@ -148,7 +150,11 @@ function ProgramForm({
       note,
     });
     if (!parsed.success) {
-      setMessage(t.saveError);
+      setMessage(
+        parsed.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      );
       return;
     }
     setBusy(true);
@@ -158,12 +164,12 @@ function ProgramForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed.data),
       });
-      if (!r.ok) throw Error();
+      if (!r.ok) throw Error((await r.json()).error || t.saveError);
       setMessage(t.saved);
       setNote("");
       onSaved();
-    } catch {
-      setMessage(t.saveError);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : t.saveError);
     } finally {
       setBusy(false);
     }
@@ -214,8 +220,9 @@ function ProgramForm({
               {t.end}
               <input
                 type="time"
-                required
-                value={tm(h.end)}
+                required={h.end !== 1440}
+                disabled={h.end === 1440}
+                value={h.end === 1440 ? "00:00" : tm(h.end)}
                 onChange={(e) =>
                   setHours(
                     hours.map((v, j) =>
@@ -224,6 +231,24 @@ function ProgramForm({
                   )
                 }
               />
+            </label>
+            <label className="inline-check">
+              <input
+                type="checkbox"
+                checked={h.end === 1440}
+                onChange={(e) =>
+                  setHours(
+                    hours.map((v, j) =>
+                      j === i
+                        ? { ...v, end: e.target.checked ? 1440 : 1439 }
+                        : v,
+                    ),
+                  )
+                }
+              />
+              {locale === "en"
+                ? "End of day (midnight)"
+                : "Fin del día (medianoche)"}
             </label>
             <button
               aria-label={t.remove}
@@ -493,9 +518,10 @@ function ProgramForm({
   );
 }
 export function Dashboard({ admin = false }: { admin?: boolean }) {
-  const { t, locale, providers, refresh } = useApp();
+  const { t, locale, providers, refresh, loadError, loading } = useApp();
   const [account, setAccount] = useState<Account | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [accountError, setAccountError] = useState("");
   const [selected, setSelected] = useState("");
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
@@ -503,9 +529,15 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
   function load() {
     fetch("/api/auth/me")
       .then(async (r) => {
-        if (!r.ok) throw Error();
+        if (!r.ok)
+          throw Error(
+            r.status === 503
+              ? "Audit or account history unavailable. Reload to retry."
+              : "",
+          );
         const a = await r.json();
         setAccount(a);
+        setAccountError("");
         setSelected(
           (v) =>
             v ||
@@ -513,7 +545,10 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
             "",
         );
       })
-      .catch(() => setAccount(null))
+      .catch((e) => {
+        setAccount(null);
+        setAccountError(e.message);
+      })
       .finally(() => setLoaded(true));
   }
   useEffect(() => {
@@ -527,11 +562,31 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, note: reviewNotes[id] || "" }),
       });
-      if (!r.ok) throw Error();
+      if (!r.ok) throw Error((await r.json()).error || t.saveError);
       refresh();
       load();
-    } catch {
-      setMessage(t.saveError);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : t.saveError);
+    }
+  }
+  async function resubmit(c: ChangeRequest) {
+    const current = providers.find((p) => p.id === c.programId);
+    if (!current) return;
+    try {
+      const r = await fetch("/api/changes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...c.payload,
+          baseRevision: current.revision || 0,
+          baseOrganizationRevision: current.organizationRevision || 0,
+        }),
+      });
+      if (!r.ok) throw Error((await r.json()).error || t.saveError);
+      setMessage(t.saved);
+      load();
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : t.saveError);
     }
   }
   async function logout() {
@@ -552,7 +607,7 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
   if (!account || (admin && account.role !== "admin"))
     return (
       <section className="container page-space">
-        <h1>{t.loginRequired}</h1>
+        <h1>{accountError || t.loginRequired}</h1>
         <Link className="button" href="/provider/login">
           {t.login}
         </Link>
@@ -600,18 +655,30 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
           </label>
           {provider ? (
             <ProgramForm
-              key={provider.id + provider.updatedAt}
+              key={`${provider.id}/${provider.updatedAt}/${provider.revision || 0}/${provider.organizationRevision || 0}`}
               provider={provider}
               onSaved={load}
             />
           ) : (
-            <div className="notice">{t.accessText}</div>
+            <div className="notice" role="status">
+              {loading
+                ? t.loading
+                : loadError
+                  ? t.error
+                  : admin
+                    ? locale === "en"
+                      ? "The directory is empty. Add the first listing."
+                      : "El directorio está vacío. Añade el primer registro."
+                    : t.accessText}
+            </div>
           )}
         </div>
         <aside>
-          {admin && provider && (
+          {admin && (
             <AdminTools
-              programId={provider.id}
+              key={provider?.id || "empty"}
+              programId={provider?.id}
+              demoMode={account.demo}
               onSaved={() => {
                 refresh();
                 load();
@@ -632,8 +699,47 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
                 <small>{new Date(c.submittedAt).toLocaleString(locale)}</small>
                 <details>
                   <summary>{t.details}</summary>
+                  <h4>
+                    {locale === "en"
+                      ? "Current published values"
+                      : "Valores publicados actuales"}
+                  </h4>
+                  <pre>
+                    {JSON.stringify(
+                      providers.find((p) => p.id === c.programId),
+                      null,
+                      2,
+                    )}
+                  </pre>
+                  <h4>
+                    {locale === "en" ? "Proposed values" : "Valores propuestos"}
+                  </h4>
                   <pre>{JSON.stringify(c.payload, null, 2)}</pre>
                 </details>
+                {c.status === "pending" &&
+                  providers.some(
+                    (p) =>
+                      p.id === c.programId &&
+                      ((p.revision || 0) !== c.payload.baseRevision ||
+                        (p.organizationRevision || 0) !==
+                          c.payload.baseOrganizationRevision),
+                  ) && (
+                    <div className="notice">
+                      <p>
+                        {locale === "en"
+                          ? "Stale proposal. Compare the current and proposed values above. Resubmitting explicitly requests a new review of all proposed values."
+                          : "Propuesta desactualizada. Compara los valores actuales y propuestos. El reenvío solicita una nueva revisión de todos los valores."}
+                      </p>
+                      <button
+                        className="button secondary small"
+                        onClick={() => resubmit(c)}
+                      >
+                        {locale === "en"
+                          ? "Resubmit proposed values for review"
+                          : "Reenviar valores para revisión"}
+                      </button>
+                    </div>
+                  )}
                 {c.reviewNote && <p>{c.reviewNote}</p>}
                 {admin && c.status === "pending" && (
                   <>
@@ -685,6 +791,16 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
                   )[a.action] ||
                   a.action}
                 <small>{new Date(a.at).toLocaleString(locale)}</small>
+                <span>
+                  {providers.find((p) => p.id === a.entityId)?.name[locale] ||
+                    a.entityId}{" "}
+                  · {a.actor}
+                </span>
+                {a.method && (
+                  <span>
+                    {a.method} · {a.fields?.join(", ")}
+                  </span>
+                )}
                 {a.notes && <span>{a.notes}</span>}
               </p>
             ))}

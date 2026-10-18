@@ -1,6 +1,8 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readFile } from "node:fs/promises";
 import { beforeAll, afterAll, it, expect } from "vitest";
+import { rankProviders } from "../src/lib/matching";
+import { defaultPreferences, type Provider } from "../src/lib/model";
 let db: PGlite;
 let program: string;
 let org: string;
@@ -17,6 +19,7 @@ beforeAll(async () => {
     "002_admin_tools.sql",
     "003_validate_proposals.sql",
     "004_verification_boundaries.sql",
+    "005_review_remediation.sql",
   ]) {
     const sql = await readFile("supabase/migrations/" + f, "utf8");
     await db.exec(sql.replace("create extension if not exists pgcrypto;", ""));
@@ -196,11 +199,12 @@ it("rejects malformed proposals sent directly to the database", async () => {
 
 it("keeps fictional seed records unverified after an administrator review", async () => {
   await asUser(admin, async () => {
-    await db.query("select public.record_verification($1,$2,$3,$4)", [
+    await db.query("select public.record_verification($1,$2,$3,$4,$5)", [
       program,
       "official_source",
       ["hours", "offerings", "eligibility", "coordinates", "phone"],
       "Reviewed fictional fixture for regression testing only",
+      "unknown",
     ]);
   });
   const result = await db.query<{
@@ -327,5 +331,177 @@ it("keeps anonymous feedback private and rejects short reports", async () => {
     expect((await db.query("select * from public.feedback")).rows).toHaveLength(
       1,
     );
+  });
+});
+
+async function propose(target = program, patch = {}) {
+  return (
+    await db.query<{ id: string }>(
+      "insert into public.change_requests(program_id,submitted_by,payload) values ($1,$2,$3) returning id",
+      [target, admin, { ...payload(), programId: target, ...patch }],
+    )
+  ).rows[0].id;
+}
+async function approve(id: string) {
+  await db.query(
+    "select public.review_change($1,'approved','Explicit regression review')",
+    [id],
+  );
+}
+it.each([
+  {
+    hours: [
+      { day: 1, start: 800, end: 1000 },
+      { day: 1, start: 800, end: 1000 },
+    ],
+  },
+  {
+    exceptions: [
+      { date: "2026-10-19", closed: true },
+      { date: "2026-10-19", closed: false },
+    ],
+  },
+  { exceptions: [{ date: "2026-02-30", closed: true }] },
+])("rejects invalid schedules before queue insertion: %j", async (patch) => {
+  await asUser(admin, async () => {
+    await expect(propose(program, patch)).rejects.toThrow();
+  });
+});
+it("rejects older proposals, serializes competing approvals, and allows explicit re-review", async () => {
+  await asUser(admin, async () => {
+    const a = await propose(program, { phone: "1111111111" });
+    const b = await propose(program, { phone: "2222222222" });
+    await approve(b);
+    await expect(approve(a)).rejects.toThrow("Stale proposal");
+    expect(
+      (
+        await db.query<{ phone: string }>(
+          "select phone from public.providers where id=$1",
+          [org],
+        )
+      ).rows[0].phone,
+    ).toBe("2222222222");
+    const resubmitted = await propose(program, { phone: "1111111111" });
+    await approve(resubmitted);
+    const c = await propose();
+    const d = await propose();
+    const results = await Promise.allSettled([approve(c), approve(d)]);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
+  });
+});
+it("protects the organization phone across separate programs", async () => {
+  const location = (
+    await db.query<{ location_id: string }>(
+      "select location_id from public.service_programs where id=$1",
+      [program],
+    )
+  ).rows[0].location_id;
+  const sibling = (
+    await db.query<{ id: string }>(
+      "insert into public.service_programs(provider_id,location_id,service_type) values ($1,$2,'meals') returning id",
+      [org, location],
+    )
+  ).rows[0].id;
+  await asUser(admin, async () => {
+    const a = await propose(program, { phone: "3333333333" });
+    const b = await propose(sibling, { phone: "4444444444" });
+    await approve(b);
+    await expect(approve(a)).rejects.toThrow("Stale proposal");
+    expect(
+      (
+        await db.query<{ phone: string }>(
+          "select phone from public.providers where id=$1",
+          [org],
+        )
+      ).rows[0].phone,
+    ).toBe("4444444444");
+  });
+});
+it("requires classification evidence, retains administrator history, and invalidates classification on edits", async () => {
+  await db.query("update public.providers set demo=false where id=$1", [org]);
+  await asUser(admin, async () => {
+    await expect(
+      db.query(
+        "select public.record_verification($1,'official_source',array['eligibility'],'Distinctive eligibility evidence')",
+        [program],
+      ),
+    ).rejects.toThrow("classification");
+    for (const status of ["restricted", "unknown", "unrestricted"]) {
+      await db.query(
+        "select public.record_verification($1,'official_source',array['hours','offerings','eligibility'],'Distinctive eligibility evidence',$2)",
+        [program, status],
+      );
+      expect(
+        (
+          await db.query<{ status: string }>(
+            "select status from public.eligibility_requirements where program_id=$1",
+            [program],
+          )
+        ).rows[0].status,
+      ).toBe(status);
+      const listing = (
+        await db.query<{ document: Provider }>(
+          "select document from public.public_provider_documents where document->>'id'=$1",
+          [program],
+        )
+      ).rows[0].document;
+      expect(
+        rankProviders(defaultPreferences, [listing])[0].evaluations.find(
+          (v) => v.factor === "eligibility",
+        )?.state,
+      ).toBe(status === "unrestricted" ? "compatible" : "unknown");
+    }
+    const history = await db.query<{
+      actor: string;
+      entity_id: string;
+      after_data: object;
+    }>(
+      "select actor,entity_id,after_data from public.audit_logs where after_data->>'notes'='Distinctive eligibility evidence'",
+    );
+    expect(history.rows[0]).toMatchObject({
+      actor: admin,
+      entity_id: program,
+      after_data: {
+        method: "official_source",
+        fields: ["hours", "offerings", "eligibility"],
+        notes: "Distinctive eligibility evidence",
+      },
+    });
+    await approve(await propose());
+    expect(
+      (
+        await db.query<{ status: string }>(
+          "select status from public.eligibility_requirements where program_id=$1",
+          [program],
+        )
+      ).rows[0].status,
+    ).toBe("unknown");
+  });
+  await asUser(provider, async () => {
+    expect(
+      (
+        await db.query(
+          "select * from public.audit_logs where after_data->>'notes'='Distinctive eligibility evidence'",
+        )
+      ).rows,
+    ).toHaveLength(0);
+    await expect(
+      db.query(
+        "select public.record_verification($1,'official_source',array['eligibility'],'Forged verification evidence','unrestricted')",
+        [program],
+      ),
+    ).rejects.toThrow();
+    await expect(
+      db.query(
+        "select public.record_verification_unclassified($1,'official_source',array['eligibility'],'Forged verification evidence')",
+        [program],
+      ),
+    ).rejects.toThrow();
+    await expect(
+      db.query(
+        "select public.review_change_unversioned(gen_random_uuid(),'approved','Bypass revision guard')",
+      ),
+    ).rejects.toThrow();
   });
 });

@@ -2,24 +2,31 @@
 import { useState } from "react";
 import { Plus, ShieldCheck } from "lucide-react";
 import { useApp } from "./context";
-import { listingSchema, verificationSchema } from "@/lib/listings";
+import {
+  listingSchema,
+  realListingSchema,
+  verificationSchema,
+} from "@/lib/listings";
 export function AdminTools({
   programId,
+  demoMode,
   onSaved,
 }: {
-  programId: string;
+  programId?: string;
+  demoMode: boolean;
   onSaved: () => void;
 }) {
-  const { t, locale, demo } = useApp();
+  const { t, locale } = useApp();
   const [message, setMessage] = useState("");
   const [fields, setFields] = useState<string[]>([]);
   const [method, setMethod] = useState("official_source");
   const [notes, setNotes] = useState("");
+  const [eligibilityStatus, setEligibilityStatus] = useState("");
   async function add(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const d = new FormData(form);
-    const v = listingSchema.safeParse({
+    const v = (demoMode ? listingSchema : realListingSchema).safeParse({
       name: { en: d.get("nameEn"), es: d.get("nameEs") },
       description: { en: d.get("descriptionEn"), es: d.get("descriptionEs") },
       address: { en: d.get("addressEn"), es: d.get("addressEs") },
@@ -32,7 +39,11 @@ export function AdminTools({
       collectedAt: new Date().toISOString(),
     });
     if (!v.success) {
-      setMessage(t.saveError);
+      setMessage(
+        v.error.issues
+          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .join("; "),
+      );
       return;
     }
     try {
@@ -57,9 +68,10 @@ export function AdminTools({
       method,
       fields,
       notes,
+      eligibilityStatus: eligibilityStatus || undefined,
     });
     if (!v.success) {
-      setMessage(t.saveError);
+      setMessage(v.error.issues.map((i) => i.message).join("; "));
       return;
     }
     try {
@@ -92,7 +104,7 @@ export function AdminTools({
             {locale === "en" ? "Add a listing" : "Añadir un registro"}
           </summary>
           <form onSubmit={add}>
-            {demo && <p className="small-text">{t.demoNotice}</p>}
+            {demoMode && <p className="small-text">{t.demoNotice}</p>}
             {[
               ["name", locale === "en" ? "Name" : "Nombre"],
               ["description", t.description],
@@ -158,7 +170,13 @@ export function AdminTools({
             </div>
             <label>
               {t.source} · URL
-              <input name="sourceUrl" type="url" placeholder="https://" />
+              <input
+                name="sourceUrl"
+                type="url"
+                placeholder="https://"
+                required={!demoMode}
+                pattern="https://.*"
+              />
             </label>
             <button className="button small">
               {locale === "en" ? "Create listing" : "Crear registro"}
@@ -166,93 +184,127 @@ export function AdminTools({
           </form>
         </details>
       </div>
-      <div className="detail-block">
-        <h2>
-          <ShieldCheck size={20} />{" "}
-          {locale === "en"
-            ? "Data quality review"
-            : "Calidad de la información"}
-        </h2>
-        <form onSubmit={verify}>
-          <p>
+      {programId && (
+        <div className="detail-block">
+          <h2>
+            <ShieldCheck size={20} />{" "}
             {locale === "en"
-              ? "Only record evidence you personally reviewed. Demo records remain fictional."
-              : "Registra solo evidencia que hayas revisado personalmente. Los datos de ejemplo siguen siendo ficticios."}
-          </p>
-          <label>
-            {locale === "en" ? "Verification method" : "Método de verificación"}
-            <select value={method} onChange={(e) => setMethod(e.target.value)}>
-              <option value="official_source">
+              ? "Data quality review"
+              : "Calidad de la información"}
+          </h2>
+          <form onSubmit={verify}>
+            <p>
+              {locale === "en"
+                ? "Only record evidence you personally reviewed. Demo records remain fictional."
+                : "Registra solo evidencia que hayas revisado personalmente. Los datos de ejemplo siguen siendo ficticios."}
+            </p>
+            <label>
+              {locale === "en"
+                ? "Verification method"
+                : "Método de verificación"}
+              <select
+                value={method}
+                onChange={(e) => setMethod(e.target.value)}
+              >
+                <option value="official_source">
+                  {locale === "en"
+                    ? "Official source review"
+                    : "Revisión de fuente oficial"}
+                </option>
+                <option value="phone">
+                  {locale === "en"
+                    ? "Phone confirmation"
+                    : "Confirmación telefónica"}
+                </option>
+                <option value="in_person">
+                  {locale === "en"
+                    ? "In-person confirmation"
+                    : "Confirmación presencial"}
+                </option>
+                <option value="flag_outdated">
+                  {locale === "en"
+                    ? "Flag outdated information"
+                    : "Marcar información desactualizada"}
+                </option>
+              </select>
+            </label>
+            {method !== "flag_outdated" && (
+              <fieldset>
+                <legend>
+                  {locale === "en"
+                    ? "Fields actually confirmed"
+                    : "Datos realmente confirmados"}
+                </legend>
+                {[
+                  ["hours", t.hours],
+                  ["offerings", t.offerings],
+                  ["eligibility", t.eligibility],
+                  [
+                    "coordinates",
+                    locale === "en" ? "Coordinates" : "Coordenadas",
+                  ],
+                  ["phone", t.contact],
+                ].map(([key, label]) => (
+                  <label className="inline-check" key={key}>
+                    <input
+                      type="checkbox"
+                      checked={fields.includes(key)}
+                      onChange={() =>
+                        setFields(
+                          fields.includes(key)
+                            ? fields.filter((f) => f !== key)
+                            : [...fields, key],
+                        )
+                      }
+                    />
+                    {label}
+                  </label>
+                ))}
+              </fieldset>
+            )}
+            {method !== "flag_outdated" && fields.includes("eligibility") && (
+              <label>
                 {locale === "en"
-                  ? "Official source review"
-                  : "Revisión de fuente oficial"}
-              </option>
-              <option value="phone">
-                {locale === "en"
-                  ? "Phone confirmation"
-                  : "Confirmación telefónica"}
-              </option>
-              <option value="in_person">
-                {locale === "en"
-                  ? "In-person confirmation"
-                  : "Confirmación presencial"}
-              </option>
-              <option value="flag_outdated">
-                {locale === "en"
-                  ? "Flag outdated information"
-                  : "Marcar información desactualizada"}
-              </option>
-            </select>
-          </label>
-          {method !== "flag_outdated" && (
-            <fieldset>
-              <legend>
-                {locale === "en"
-                  ? "Fields actually confirmed"
-                  : "Datos realmente confirmados"}
-              </legend>
-              {[
-                ["hours", t.hours],
-                ["offerings", t.offerings],
-                ["eligibility", t.eligibility],
-                [
-                  "coordinates",
-                  locale === "en" ? "Coordinates" : "Coordenadas",
-                ],
-                ["phone", t.contact],
-              ].map(([key, label]) => (
-                <label className="inline-check" key={key}>
-                  <input
-                    type="checkbox"
-                    checked={fields.includes(key)}
-                    onChange={() =>
-                      setFields(
-                        fields.includes(key)
-                          ? fields.filter((f) => f !== key)
-                          : [...fields, key],
-                      )
-                    }
-                  />
-                  {label}
-                </label>
-              ))}
-            </fieldset>
-          )}
-          <label>
-            {t.reviewNote}
-            <textarea
-              required
-              minLength={10}
-              maxLength={1000}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </label>
-          <button className="button secondary small">
-            {locale === "en" ? "Record review" : "Registrar revisión"}
-          </button>
-        </form>
-      </div>
+                  ? "Evidence-confirmed eligibility"
+                  : "Elegibilidad confirmada por evidencia"}
+                <select
+                  required
+                  value={eligibilityStatus}
+                  onChange={(e) => setEligibilityStatus(e.target.value)}
+                >
+                  <option value="">
+                    {locale === "en"
+                      ? "Choose classification"
+                      : "Elige clasificación"}
+                  </option>
+                  <option value="unrestricted">
+                    {locale === "en" ? "Unrestricted" : "Sin restricciones"}
+                  </option>
+                  <option value="restricted">
+                    {locale === "en" ? "Restricted" : "Con restricciones"}
+                  </option>
+                  <option value="unknown">
+                    {locale === "en" ? "Unconfirmed" : "Sin confirmar"}
+                  </option>
+                </select>
+              </label>
+            )}
+            <label>
+              {t.reviewNote}
+              <textarea
+                required
+                minLength={10}
+                maxLength={1000}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </label>
+            <button className="button secondary small">
+              {locale === "en" ? "Record review" : "Registrar revisión"}
+            </button>
+          </form>
+        </div>
+      )}
       {message && (
         <p role="status" className="notice">
           {message}

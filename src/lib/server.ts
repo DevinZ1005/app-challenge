@@ -10,7 +10,11 @@ import { assertRuntimeConfiguration } from "./runtime";
 export { HttpError, apiError, readJson } from "./http";
 import { demoProviders } from "./data";
 import type { Provider } from "./model";
-import { listingSchema, verificationSchema } from "./listings";
+import {
+  listingSchema,
+  realListingSchema,
+  verificationSchema,
+} from "./listings";
 import { updateSchema, type ChangeRequest, type AuditEntry } from "./updates";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -213,11 +217,16 @@ export async function dashboard(who: Identity) {
           .order("created_at", { ascending: false })
           .limit(100)
       : { data: [] };
-  const { data: audit } = await client
+  const { data: audit, error: auditError } = await client
     .from("audit_logs")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(100);
+  if (auditError)
+    throw new HttpError(
+      503,
+      "Audit history unavailable; retry loading the dashboard",
+    );
   return {
     feedback: (feedback || []).map((f) => ({
       id: f.id,
@@ -233,12 +242,16 @@ export async function dashboard(who: Identity) {
       payload: r.payload,
       reviewNote: r.review_note,
     })),
-    audit: (audit || []).map((a) => ({
+    audit: (audit || []).map((a): AuditEntry => ({
       id: a.id,
       actor: a.actor,
       action: a.action,
       at: a.created_at,
       changeId: a.change_id,
+      entityId: a.entity_id,
+      method: a.after_data?.method,
+      fields: a.after_data?.fields,
+      notes: a.after_data?.notes,
     })),
   };
 }
@@ -251,8 +264,16 @@ export async function submitChange(who: Identity, raw: unknown) {
     p.offerings = p.offerings.map((o) => ({ ...o, verified: false }));
   if (isDemo)
     return mutate((s) => {
-      if (!s.providers.some((v) => v.id === p.programId))
-        throw new HttpError(404, "Program not found");
+      const current = s.providers.find((v) => v.id === p.programId);
+      if (!current) throw new HttpError(404, "Program not found");
+      if (
+        p.baseRevision !== (current.revision || 0) ||
+        p.baseOrganizationRevision !== (current.organizationRevision || 0)
+      )
+        throw new HttpError(
+          409,
+          "Listing changed. Reload, compare current and proposed values, and resubmit for review.",
+        );
       const id = crypto.randomUUID();
       s.changes.unshift({
         id,
@@ -267,6 +288,7 @@ export async function submitChange(who: Identity, raw: unknown) {
         id: crypto.randomUUID(),
         actor: who.id,
         action: "submitted",
+        entityId: p.programId,
         at: new Date().toISOString(),
         changeId: id,
       });
@@ -277,7 +299,13 @@ export async function submitChange(who: Identity, raw: unknown) {
     .insert({ program_id: p.programId, submitted_by: who.id, payload: p })
     .select("id")
     .single();
-  if (error) throw new HttpError(403, "Update rejected");
+  if (error)
+    throw new HttpError(
+      error.code === "40001" ? 409 : 400,
+      error.code === "40001"
+        ? "Listing changed. Reload, compare current and proposed values, and resubmit for review."
+        : "Update rejected; check proposal fields",
+    );
   return data;
 }
 export async function reviewChange(
@@ -295,6 +323,14 @@ export async function reviewChange(
       if (c.status !== "pending") throw new HttpError(409, "Already reviewed");
       if (status === "approved") {
         const p = s.providers.find((p) => p.id === c.programId)!;
+        if (
+          c.payload.baseRevision !== (p.revision || 0) ||
+          c.payload.baseOrganizationRevision !== (p.organizationRevision || 0)
+        )
+          throw new HttpError(
+            409,
+            "Stale proposal. Compare current and proposed values, then explicitly resubmit for review.",
+          );
         p.program = {
           ...p.program,
           hours: c.payload.hours,
@@ -308,6 +344,15 @@ export async function reviewChange(
         p.phoneVerified = false;
         p.updatedAt = new Date().toISOString();
         p.verifiedAt = null;
+        p.revision = (p.revision || 0) + 1;
+        for (const sibling of s.providers.filter(
+          (v) => (v.organizationId || v.id) === (p.organizationId || p.id),
+        )) {
+          sibling.phone = p.phone;
+          sibling.phoneVerified = false;
+          sibling.organizationRevision =
+            (sibling.organizationRevision || 0) + 1;
+        }
       }
       c.status = status;
       c.reviewNote = note;
@@ -315,6 +360,7 @@ export async function reviewChange(
         id: crypto.randomUUID(),
         actor: who.id,
         action: status,
+        entityId: c.programId,
         at: new Date().toISOString(),
         changeId: id,
       });
@@ -325,7 +371,13 @@ export async function reviewChange(
     decision: status,
     review_reason: note,
   });
-  if (error) throw new HttpError(409, "Review rejected");
+  if (error)
+    throw new HttpError(
+      409,
+      error.code === "40001"
+        ? "Stale proposal. Compare current and proposed values, then explicitly resubmit for review."
+        : "Review rejected; reload and check the review note",
+    );
   return { ok: true };
 }
 export function checkOrigin(request: Request) {
@@ -356,7 +408,7 @@ export function rateLimit(key: string) {
 export async function createListing(who: Identity, raw: unknown) {
   if (who.role !== "admin")
     throw new HttpError(403, "Administrator access required");
-  const v = listingSchema.parse(raw);
+  const v = (isDemo ? listingSchema : realListingSchema).parse(raw);
   if (isDemo)
     return mutate((s) => {
       const id = "demo-" + crypto.randomUUID();
@@ -392,6 +444,7 @@ export async function createListing(who: Identity, raw: unknown) {
         id: crypto.randomUUID(),
         actor: who.id,
         action: "listing_created",
+        entityId: id,
         at: new Date().toISOString(),
         changeId: id,
       });
@@ -412,6 +465,7 @@ export async function verifyListing(who: Identity, raw: unknown) {
       const p = s.providers.find((p) => p.id === v.programId);
       if (!p) throw new HttpError(404, "Program not found");
       if (v.method === "flag_outdated") {
+        p.program.eligibilityStatus = "unknown";
         p.verifiedAt = null;
         p.phoneVerified = false;
         p.coordinatesVerified = false;
@@ -421,6 +475,8 @@ export async function verifyListing(who: Identity, raw: unknown) {
             verified: false,
           }));
       } else {
+        if (v.fields.includes("eligibility"))
+          p.program.eligibilityStatus = v.eligibilityStatus!;
         // Demo records remain fictional; no real-world verification dates or contacts.
         if (v.fields.includes("offerings") && p.program.offerings)
           p.program.offerings = p.program.offerings.map((o) => ({
@@ -428,6 +484,11 @@ export async function verifyListing(who: Identity, raw: unknown) {
             verified: true,
           }));
       }
+      p.revision = (p.revision || 0) + 1;
+      for (const sibling of s.providers.filter(
+        (v) => (v.organizationId || v.id) === (p.organizationId || p.id),
+      ))
+        sibling.organizationRevision = (sibling.organizationRevision || 0) + 1;
       s.audit.push({
         id: crypto.randomUUID(),
         actor: who.id,
@@ -436,6 +497,9 @@ export async function verifyListing(who: Identity, raw: unknown) {
             ? "flag_outdated"
             : "verification_recorded",
         notes: v.notes,
+        entityId: v.programId,
+        method: v.method,
+        fields: v.fields,
         at: new Date().toISOString(),
         changeId: v.programId,
       });
@@ -446,6 +510,7 @@ export async function verifyListing(who: Identity, raw: unknown) {
     verification_method: v.method,
     fields: v.fields,
     verification_notes: v.notes,
+    eligibility_classification: v.eligibilityStatus || null,
   });
   if (error) throw new HttpError(400, "Verification rejected");
   return { ok: true };

@@ -53,9 +53,11 @@ export function apiError(e: unknown) {
   const error =
     e instanceof HttpError
       ? e.message
-      : status === 400
-        ? "Invalid input"
-        : "Request failed";
+      : e instanceof ZodError
+        ? e.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+        : status === 400
+          ? "Invalid input"
+          : "Request failed";
   if (status >= 500) {
     // Never log exception messages, request bodies, credentials, or household data.
     console.error(
