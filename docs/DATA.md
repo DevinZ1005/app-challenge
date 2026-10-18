@@ -13,7 +13,7 @@ Research date: 2026-10-17. Sources were identified through web research; **no in
 
 The app links to the official NYC food finder so prototype users can access real services. It does not scrape or republish unverified current hours.
 
-## Student checklist, per program/location
+## Verification checklist, per program/location
 
 - [ ] Record original official/public URL, organization, collected UTC timestamp, attribution and reuse terms.
 - [ ] Confirm public organization name, actual service location, ZIP code, and type of assistance.
@@ -30,7 +30,7 @@ The app links to the official NYC food finder so prototype users can access real
 - [ ] Keep missing facts explicitly unknown; do not fill gaps from similar providers.
 - [ ] Request organization consent/association evidence before granting a provider account.
 
-Suggested contact script: “We are students developing a prototype directory. May we confirm your public pickup schedule and whether the listed information is appropriate to publish? We will clearly identify uncertain and changeable details.” This is a suggested script, not a record of an actual call.
+Suggested contact script: “We are developing a prototype directory. May we confirm your public pickup schedule and whether the listed information is appropriate to publish? We will clearly identify uncertain and changeable details.” This is a suggested script, not a record of an actual call.
 
 ## Import contract
 

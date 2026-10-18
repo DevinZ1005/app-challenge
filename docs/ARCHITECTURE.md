@@ -91,14 +91,14 @@ Example: Tuesday afternoon availability, no cooking equipment, no refrigeration,
 
 ## Uncertainty and difficult cases
 
-- No overlap at touching endpoints; one minute of overlap is accepted in the reference algorithm. A minimum visit duration is a useful student improvement.
+- No overlap at touching endpoints; one minute of overlap is accepted in the reference algorithm. A minimum visit duration is a possible improvement.
 - A single food offering must satisfy all hard food constraints together. One shelf-stable food that needs a stove plus one cold ready-to-eat food does not solve a no-refrigeration/no-equipment household. A separate zero-weight combination constraint blocks the match without counting an individual factor twice; even a 100% known-factor score cannot override this conflict.
 - Partial/unknown storage, absent offerings, and unverified dietary statements cannot be treated as confirmation.
 - Stale or unverified listings remain possible even when their known-fit score is 100%. Confidence measures information coverage, **not** probability, food availability, or data accuracy. Freshness is a separate rule and badge.
 - Schedule exceptions close whole local dates; custom exceptional opening hours are a future extension. Split overnight schedules into two day intervals.
 - `Intl.DateTimeFormat` uses New York local days safely around DST; no browser timezone assumptions.
 - No straight-line speed conversion or fabricated transit times. Travel-provider integrations must supply mode, reliability, timestamp, the exact household origin and verified service destination, and actual route estimates. Estimates for a different origin or destination are unknown.
-- Other-diet free text is retained only in page memory and evaluated as unknown; no automatic interpretation or AI inference.
+- Other-diet free text is retained only in page memory and evaluated as unknown; no automatic interpretation or inference.
 
 ## Complexity
 
@@ -106,4 +106,4 @@ With `N` programs, `A` household intervals, `H` service intervals, `X` closures,
 
 ## Security and testing
 
-See [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md), and the migration comments. Core algorithm reimplementation is student-owned; this file documents a reference rather than claiming student authorship.
+See [SECURITY.md](SECURITY.md), [TESTING.md](TESTING.md), and the migration comments.

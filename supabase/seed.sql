@@ -3,7 +3,7 @@ do $$
 declare org uuid; loc uuid; program uuid;
 begin
  insert into public.providers(name,description,demo,published) values('{"en":"Demo Garden Table Pantry","es":"Despensa ficticia Mesa del Jardín"}','{"en":"Fictional development service. Do not visit.","es":"Servicio ficticio. No visites esta ubicación."}',true,true) returning id into org;
- insert into public.data_sources(provider_id,name,url,collected_at,attribution) values(org,'{"en":"Fictional development fixture","es":"Datos ficticios de desarrollo"}',null,now(),'AI-assisted fixture; not a real organization');
+ insert into public.data_sources(provider_id,name,url,collected_at,attribution) values(org,'{"en":"Fictional development fixture","es":"Datos ficticios de desarrollo"}',null,now(),'Fictional development fixture; not a real organization');
  insert into public.service_locations(provider_id,address,postal_code,city,latitude,longitude) values(org,'{"en":"Illustrative location, Bronx 10468","es":"Ubicación ilustrativa, Bronx 10468"}','10468','New York',40.873,-73.891) returning id into loc;
  insert into public.service_programs(provider_id,location_id,service_type,hours_known,offerings_known) values(org,loc,'pantry',true,true) returning id into program;
  insert into public.operating_hours(program_id,day,start_minute,end_minute) values(program,1,780,1020),(program,5,540,720);

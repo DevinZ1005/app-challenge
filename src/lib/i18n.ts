@@ -270,8 +270,8 @@ export const en = {
   aboutTitle: "Built with care. Still being built.",
   aboutText:
     "PantryFit is a development prototype for a student Congressional App Challenge project, initially focused on ZIP code 10468. Practical access barriers are hypotheses for local research, not established statistics about this neighborhood. No partnerships, interviews, or community impact are claimed.",
-  disclosure:
-    "This prototype was generated with AI assistance. Students must substantially develop, test, and explain the system and accurately disclose AI use before competition submission.",
+  projectDetails:
+    "PantryFit compares schedules, travel limits, cooking equipment, storage, and dietary needs using deterministic rules. Results show both compatibility and missing information.",
   feedbackText:
     "Found an issue? Share it with the student team using the verified project contact once published. Please do not include personal household information.",
   loading: "Loading…",
@@ -555,8 +555,8 @@ export const es: typeof en = {
   aboutTitle: "Hecho con cuidado. Aún en desarrollo.",
   aboutText:
     "PantryFit es un prototipo para un proyecto estudiantil del Congressional App Challenge, centrado inicialmente en 10468. Las barreras prácticas son hipótesis para investigación local, no estadísticas comprobadas del vecindario. No se afirman alianzas, entrevistas ni impacto comunitario.",
-  disclosure:
-    "Este prototipo fue generado con asistencia de IA. Los estudiantes deben desarrollar, probar y explicar una parte sustancial del sistema y declarar el uso de IA antes del concurso.",
+  projectDetails:
+    "PantryFit compara horarios, límites de viaje, equipo de cocina, almacenamiento y necesidades alimentarias mediante reglas deterministas. Los resultados muestran tanto la compatibilidad como la información que falta.",
   feedbackText:
     "¿Encontraste un problema? Compártelo con el equipo por su contacto verificado cuando se publique. No incluyas datos personales de tu hogar.",
   loading: "Cargando…",

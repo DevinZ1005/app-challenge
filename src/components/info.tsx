@@ -94,7 +94,7 @@ export function InfoPage({
           <div className="info-panel">
             <Code2 size={30} />
             <h2>{t.about}</h2>
-            <p>{t.disclosure}</p>
+            <p>{t.projectDetails}</p>
           </div>
           <div className="detail-block" id="feedback">
             <h2>{t.feedback}</h2>

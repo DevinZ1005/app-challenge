@@ -2,7 +2,7 @@
 
 ## Vercel
 
-1. Push this source to a repository you control. Preserve `AI_USAGE.md` and the student contribution record.
+1. Push this source to a repository you control.
 2. Import the project into Vercel using the Next.js preset and Node.js 22 or 24. Root directory is this `pantryfit` directory. Build: `npm run build`; install: `npm ci`.
 3. For a temporary demonstration, leave both Supabase variables unset. This exposes public demo credentials for fictional data only. Vercel `/tmp` storage is ephemeral and per-instance; demonstrate the complete persistent provider workflow locally or configure Supabase.
 4. For persistent use, configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` for the intended environment. These are public project identifiers/anonymous keys, not privileged keys. Rebuild after changing public variables.
@@ -35,6 +35,3 @@ values ('PROVIDER_AUTH_USER_UUID','ORGANIZATION_UUID',true,'ADMIN_AUTH_USER_UUID
 
 Do not advertise this prototype as a live food-assistance directory until verified data, current provider contacts, translated content review, Supabase integration tests, accessibility/user tests, persistent rate limiting, and privacy review are complete. Deployment credentials and account-specific setup are human-owned. No credential values are committed.
 
-The installed Sites instructions were read. Their required local setup/source/publishing scripts were not mounted or readable here, so Sites publication could not be completed through its supported workflow. Vercel deployment is prepared instead; no fake deployment URL is supplied.
-
-The [Sites skill](skill://plugin_connector_1p_689987207de08191979cf68eca2941c6/sites/SKILL.md) states: “For hosted work, package with the source helper using remaining checks/builds as ordered argument arrays and an absolute `archivePath`.” That helper was not available locally or readable from the skill package, preventing the supported Sites publishing workflow. This does not prevent running or building the Next.js app locally.

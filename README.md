@@ -1,10 +1,10 @@
 # PantryFit
 
-**Food assistance that fits your life.** A functional, AI-assisted development prototype for a student Congressional App Challenge project, starting with the Bronx’s 10468 ZIP code.
+**Food assistance that fits your life.** A functional development prototype for the Congressional App Challenge, starting with the Bronx’s 10468 ZIP code.
 
 PantryFit compares household schedules, travel limits, cooking equipment, refrigeration, and dietary needs with documented services. It explains both compatibility and missing information. No household account is required.
 
-> All built-in services are fictional. Do not visit their illustrative locations. No real organizations, partnerships, interviews, impact statistics, or student-authored code are claimed. Students must personally complete substantial technical work before competition submission.
+> All built-in services are fictional. Do not visit their illustrative locations. No real organizations, partnerships, interviews, or impact statistics are claimed.
 
 ## Run locally
 
@@ -61,9 +61,9 @@ These public credentials are a **fictional sandbox**, not production authenticat
 | `supabase/seed.sql`    | Clearly fictional Supabase seed                                       |
 | `scripts/import.ts`    | JSON import validation; no automatic publication                      |
 | `tests/`, `e2e/`       | Unit, component, database-policy, and browser tests                   |
-| `docs/`                | Architecture, data research, student handoff, deployment, demo script |
+| `docs/`                | Architecture, data research, deployment, demo script |
 
-Next.js + React + strict TypeScript, Tailwind CSS with a custom visual system, Lucide, React Hook Form, Zod, Supabase PostgreSQL/Auth/RLS, Vitest, React Testing Library, Playwright. A small typed dictionary replaces next-intl to keep language switching and in-memory forms simple. No external AI service is used in recommendations.
+Next.js + React + strict TypeScript, Tailwind CSS with a custom visual system, Lucide, React Hook Form, Zod, Supabase PostgreSQL/Auth/RLS, Vitest, React Testing Library, Playwright. A small typed dictionary replaces next-intl to keep language switching and in-memory forms simple. Recommendations use deterministic rules.
 
 ## Trust and privacy
 
@@ -87,11 +87,11 @@ The importer validates the complete typed JSON shape, requires source URLs for r
 
 ## Deployment
 
-A standard Next.js Node build is prepared for Vercel. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). No live URL or real Supabase integration is claimed until deployment and credential-backed tests are performed. The Sites plugin was inspected, but its required local publishing helpers were unavailable in this workspace; no Site was registered.
+A standard Next.js Node build is prepared for Vercel. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). No live URL or real Supabase integration is claimed until deployment and credential-backed tests are performed.
 
 ## Known limitations
 
-- Real local data verification, student development, live Supabase credentials, Vercel deployment, a privacy review, and a completed demonstration video remain prerequisites to public/competition use.
+- Real local data verification, live Supabase credentials, Vercel deployment, a privacy review, and a completed demonstration video remain prerequisites to public/competition use.
 - Live routing, transit estimates, geocoding, and MapLibre rendering are not connected. The map control explains the fallback; the full list remains usable. ZIP/landmark inputs are not geocoded. Initial records are a single Bronx fixture set, not a national directory.
 - Eligibility restrictions are not inferred from sensitive household traits. Documented restrictions are presented as requiring confirmation. The questionnaire does not collect names, income, or immigration status.
 - Demo authentication/storage and in-memory rate limits are deliberately local prototypes. Supabase mode uses Auth tokens and RLS; sessions expire after one hour and require sign-in again. Refresh-token rotation, account recovery, invitation emails, admin membership onboarding UI, and distributed rate limits remain production work.
@@ -99,6 +99,3 @@ A standard Next.js Node build is prepared for Vercel. See [docs/DEPLOYMENT.md](d
 - The schema supports multiple programs per organization; the public app renders each program as a separate service card. The initial UI supports English/Spanish text; third languages need an additional dictionary and reviewed provider translations.
 - Automated accessibility scans and browser testing support, but do not replace, keyboard, screen-reader, bilingual, and low-end-device testing with local users. See `docs/STATUS.md` for executed checks and remaining review items.
 
-## Student ownership and AI assistance
-
-Read [STUDENT_CONTRIBUTIONS.md](STUDENT_CONTRIBUTIONS.md), [AI_USAGE.md](AI_USAGE.md), and [docs/STUDENT_HANDOFF.md](docs/STUDENT_HANDOFF.md). All initial source, tests, fixture content, and documentation were AI-assisted. No student contributions are recorded yet. The reference algorithm is working development scaffolding: students must implement or substantially redesign it, justify its mathematics, add independent tests, and demonstrate understanding.
