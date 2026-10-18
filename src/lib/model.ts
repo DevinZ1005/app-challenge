@@ -76,6 +76,9 @@ export interface ServiceProgram {
 }
 export interface Provider {
   id: string;
+  organizationId?: string;
+  revision?: number;
+  organizationRevision?: number;
   name: Bilingual;
   description: Bilingual;
   address: Bilingual;

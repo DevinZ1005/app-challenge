@@ -21,6 +21,11 @@ export const listingSchema = z.object({
   collectedAt: z.iso.datetime(),
 });
 export type ListingInput = z.infer<typeof listingSchema>;
+export const realListingSchema = listingSchema.extend({
+  sourceUrl: z
+    .url({ error: "Source URL must be an HTTPS URL" })
+    .refine((v) => v.startsWith("https://"), "Source URL must use HTTPS"),
+});
 export const verificationSchema = z
   .object({
     programId: z.string().min(1).max(80),
@@ -31,8 +36,21 @@ export const verificationSchema = z
       )
       .max(5),
     notes: z.string().min(10).max(1000),
+    eligibilityStatus: z
+      .enum(["unrestricted", "restricted", "unknown"])
+      .optional(),
   })
-  .refine((v) => v.method === "flag_outdated" || v.fields.length > 0);
+  .refine((v) => v.method === "flag_outdated" || v.fields.length > 0)
+  .refine(
+    (v) =>
+      v.method === "flag_outdated" ||
+      !v.fields.includes("eligibility") ||
+      v.eligibilityStatus !== undefined,
+    {
+      path: ["eligibilityStatus"],
+      message: "Choose the evidence-confirmed eligibility classification",
+    },
+  );
 export const providerImportSchema = z
   .object({
     id: z.string().min(1),
