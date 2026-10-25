@@ -1,5 +1,5 @@
 {
-  "reviewedOn": "2026-10-18",
+  "reviewedOn": "2026-10-25",
   "product": "PantryFit",
   "requirements": [
     {
@@ -7,7 +7,7 @@
       "status": "implemented",
       "owner": "Product",
       "releaseBlocker": false,
-      "reason": "Anonymous household matching and reviewed provider updates define the core value.",
+      "reason": "Household sign-in, guided food matching with Pip, and reviewed provider updates define the core value.",
       "evidence": ["README.md", "src/lib/matching.ts", "e2e/pantryfit.spec.ts"],
       "acceptance": "Household completes questionnaire, understands uncertainty, edits answers; provider submission becomes public only after admin approval."
     },
@@ -327,6 +327,21 @@
       "reason": "Offline caches, native packaging and live maps are deferred; stale food-service information can mislead.",
       "evidence": ["README.md"],
       "acceptance": "Maintain honest list fallback; require verified routing inputs and freshness design before introducing offline or maps."
+    },
+    {
+      "id": "AUTH-LOGIN-2026",
+      "status": "pending",
+      "owner": "App maintainer and infrastructure/security owners",
+      "releaseBlocker": true,
+      "reason": "Live household email-code login requires SMTP, shared abuse controls, staff MFA, session/recovery validation, and production configuration.",
+      "evidence": [
+        "docs/LOGIN_SECURITY_HANDOFF.md",
+        "src/lib/household-auth.ts",
+        "src/lib/auth-limits.ts",
+        "tests/household-auth.test.ts",
+        "e2e/login-pip.spec.ts"
+      ],
+      "acceptance": "All production gates in LOGIN_SECURITY_HANDOFF.md have named owners and staging/production evidence; email delivery, authorization, expiry, logout, revocation windows, and multi-instance throttling verified."
     }
   ]
 }

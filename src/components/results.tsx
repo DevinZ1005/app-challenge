@@ -18,6 +18,8 @@ import {
   ShoppingBasket,
 } from "lucide-react";
 import { useApp } from "./context";
+import { RouteMap } from "./route-map";
+import { PipTips } from "./pip";
 import { rankProviders } from "@/lib/matching";
 import type { MatchResult, MatchExplanation, Provider } from "@/lib/model";
 import type { en } from "@/lib/i18n";
@@ -239,6 +241,7 @@ export function Results() {
           {t.edit}
         </Link>
       </div>
+      <PipTips />
       <div className="results-layout">
         <aside className="filters">
           <h2>
@@ -300,12 +303,10 @@ export function Results() {
               </button>
             </div>
           </div>
-          {view === "map" && (
-            <div className="notice map-notice">
-              <MapPin />
-              {t.mapNote}
-            </div>
-          )}
+          <RouteMap
+            providers={suitable.map((r) => r.provider)}
+            expanded={view === "map"}
+          />
           {suitable.length ? (
             suitable.map((r) => <MatchCard key={r.provider.id} result={r} />)
           ) : (
@@ -415,6 +416,7 @@ export function ProviderDetail({ id }: { id: string }) {
             <h3>{t.accessibility}</h3>
             <p>{p.accessibility?.[locale] || t.accessibilityUnknown}</p>
           </div>
+          <RouteMap providers={[p]} />
         </div>
         <aside>
           <div className="detail-aside">

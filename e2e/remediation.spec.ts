@@ -1,4 +1,8 @@
+import { enterHouseholdDemo } from "./household";
 import { test, expect } from "@playwright/test";
+test.beforeEach(async ({ page }) => {
+  await enterHouseholdDemo(page);
+});
 const headers = { Origin: "http://localhost:3102" };
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/provider/login");
