@@ -1,19 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
-  MapPin,
   Navigation,
   Footprints,
   Bus,
-  CalendarDays,
-  CookingPot,
-  Refrigerator,
-  Leaf,
   ShieldCheck,
   LoaderCircle,
   Plus,
@@ -25,6 +20,9 @@ import {
   type TimeInterval,
 } from "@/lib/model";
 import { useApp } from "./context";
+import { SuggestedInput } from "./suggested-input";
+import { parseTimeInput } from "@/lib/time-input";
+import { Pip } from "./pip";
 const periods = [
   { key: "morning", start: 480, end: 720 },
   { key: "afternoon", start: 720, end: 1020 },
@@ -35,15 +33,25 @@ const clock = (n: number) =>
     .toString()
     .padStart(2, "0")}:${(n % 60).toString().padStart(2, "0")}`;
 export function Questionnaire() {
-  const { t, preferences, setPreferences } = useApp();
+  const { t, locale, preferences, setPreferences } = useApp();
+  const en = locale === "en";
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const [locationMessage, setLocationMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [customDay, setCustomDay] = useState(0);
-  const [start, setStart] = useState("09:00");
-  const [end, setEnd] = useState("12:00");
+  const [minimum, setMinimum] = useState(String(preferences.minMinutes));
+  const [maximum, setMaximum] = useState(String(preferences.maxMinutes));
+  const [start, setStart] = useState("9:00 AM");
+  const [end, setEnd] = useState("12:00 PM");
+  const [answers, setAnswers] = useState<Record<number, HouseholdPreferences>>(
+    {},
+  );
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    titleRef.current?.focus({ preventScroll: true });
+  }, [step]);
   const { register, watch, setValue, getValues } =
     useForm<HouseholdPreferences>({ defaultValues: preferences });
   const values = watch();
@@ -55,16 +63,75 @@ export function Questionnaire() {
     t.storageTitle,
     t.dietTitle,
   ];
-  const icons = [
-    MapPin,
-    Footprints,
-    CalendarDays,
-    CookingPot,
-    Refrigerator,
-    Leaf,
-  ];
+  const questions = en
+    ? [
+        "Hi, I’m Pip! Where should we look for food near you?",
+        "How do you like to get around, and how much time works for you?",
+        "When can you pick up food? Let’s find a time that fits your day.",
+        "What can you cook with? I’ll keep your kitchen in mind.",
+        "Do you have room to keep food cold?",
+        "One last thing: any food preferences you’d like me to consider?",
+      ]
+    : [
+        "¡Hola, soy Pip! ¿Dónde buscamos comida cerca de ti?",
+        "¿Cómo te desplazas y cuánto tiempo te viene bien?",
+        "¿Cuándo puedes recoger comida? Busquemos un horario que te convenga.",
+        "¿Con qué puedes cocinar? Tendré tu cocina en cuenta.",
+        "¿Tienes espacio para mantener la comida fría?",
+        "Una última cosa: ¿qué preferencias de comida quieres que considere?",
+      ];
+  const encouragement = en
+    ? [
+        "A ZIP code is enough to start. Share only what feels comfortable.",
+        "Short trips count! You can type your own range or pick an example.",
+        "Pick as many windows as you like. We’ll work around you.",
+        "No stove? No problem. There are nourishing foods you can enjoy without cooking.",
+        "Canned vegetables and fruit in its own juice can be handy when fridge space is tight.",
+        "Your choices matter. I’ll help you compare options, and you can always change your answers.",
+      ]
+    : [
+        "Un código postal es suficiente. Comparte solo lo que te resulte cómodo.",
+        "¡Los viajes cortos cuentan! Escribe tu intervalo o elige un ejemplo.",
+        "Elige los horarios que quieras. Nos adaptamos a ti.",
+        "¿Sin estufa? No pasa nada. Hay alimentos nutritivos que no necesitan cocción.",
+        "Las verduras enlatadas y la fruta en su jugo pueden ser útiles si falta espacio en el refrigerador.",
+        "Tus preferencias importan. Te ayudaré a comparar opciones y puedes cambiar tus respuestas.",
+      ];
+  function answerText(index: number, p: HouseholdPreferences) {
+    return [
+      p.zip,
+      `${t[p.mode]} · ${p.minMinutes}–${p.maxMinutes} ${t.minutes}`,
+      p.availability.length
+        ? `${p.availability.length} ${en ? "pickup windows selected" : "horarios seleccionados"}`
+        : en
+          ? "My schedule is flexible"
+          : "Mi horario es flexible",
+      p.equipment.length
+        ? p.equipment.map((item) => t[item]).join(", ")
+        : t.preferNot,
+      `${t[p.refrigeration]}${p.shelfStable ? " · " + t.shelfPreference : ""}`,
+      p.diet === "none" ? t.noPreference : t[p.diet],
+    ][index];
+  }
   function commit() {
-    const parsed = householdSchema.safeParse(getValues());
+    const min = /^\d+$/.test(minimum.trim()) ? Number(minimum) : NaN;
+    const max = /^\d+$/.test(maximum.trim()) ? Number(maximum) : NaN;
+    if (
+      !Number.isInteger(min) ||
+      !Number.isInteger(max) ||
+      min < 0 ||
+      max < 1 ||
+      max > 180 ||
+      min > max
+    ) {
+      setError(t.rangeError);
+      return false;
+    }
+    const parsed = householdSchema.safeParse({
+      ...getValues(),
+      minMinutes: min,
+      maxMinutes: max,
+    });
     if (!parsed.success) {
       setError(t.validation);
       return false;
@@ -75,8 +142,16 @@ export function Questionnaire() {
   }
   function move(next: number) {
     if (commit()) {
+      if (next > step)
+        setAnswers((old) => ({
+          ...old,
+          [step]: {
+            ...getValues(),
+            minMinutes: Number(minimum),
+            maxMinutes: Number(maximum),
+          },
+        }));
       setStep(next);
-      document.getElementById("question-title")?.focus();
     }
   }
   function toggleInterval(interval: TimeInterval) {
@@ -102,12 +177,17 @@ export function Questionnaire() {
     );
   }
   function addCustom() {
-    const m = (v: string) => Number(v.slice(0, 2)) * 60 + Number(v.slice(3));
-    if (!start || !end || m(end) <= m(start)) {
+    const startMinute = parseTimeInput(start);
+    const endMinute = parseTimeInput(end, true);
+    if (
+      startMinute === null ||
+      endMinute === null ||
+      endMinute <= startMinute
+    ) {
       setError(t.timeError);
       return;
     }
-    toggleInterval({ day: customDay, start: m(start), end: m(end) });
+    toggleInterval({ day: customDay, start: startMinute, end: endMinute });
     setError("");
   }
   function locate() {
@@ -134,62 +214,74 @@ export function Questionnaire() {
   }
   return (
     <section className="container questionnaire-page">
-      <div className="page-intro">
-        <span className="eyebrow">
-          {t.noAccount} · {t.private}
-        </span>
-        <h1>{t.questionTitle}</h1>
-        <p>{t.questionIntro}</p>
-      </div>
-      <div className="question-layout">
-        <aside className="step-sidebar">
-          <ol>
-            {titles.map((title, i) => {
-              const Icon = icons[i];
-              return (
-                <li
-                  key={title}
-                  className={
-                    i === step ? "current" : i < step ? "complete" : ""
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => move(i)}
-                    aria-current={i === step ? "step" : undefined}
-                  >
-                    <span>
-                      {i < step ? <Check size={18} /> : <Icon size={18} />}
-                    </span>
-                    <div>
-                      <small>
-                        {t.step} {i + 1}
-                      </small>
-                      <strong>
-                        {
-                          [
-                            t.zip,
-                            t.maxTime,
-                            t.hours,
-                            t.food,
-                            t.storageTitle,
-                            t.dietTitle,
-                          ][i]
-                        }
-                      </strong>
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+      <div className="pip-chat-heading">
+        <Pip small />
+        <div>
+          <span className="eyebrow">PIP · PANTRYFIT</span>
+          <h1>
+            {en
+              ? "A little chat. A better food fit."
+              : "Una charla. Comida a tu medida."}
+          </h1>
           <p>
-            <ShieldCheck size={18} />
-            {t.optional}
+            {en
+              ? "Your food buddy, one question at a time."
+              : "Tu compañero, una pregunta a la vez."}
           </p>
-        </aside>
+        </div>
+      </div>
+      <div className="pip-chat-layout">
+        <nav
+          className="chat-steps"
+          aria-label={en ? "Conversation steps" : "Pasos de la conversación"}
+        >
+          {titles.map((title, i) => (
+            <button
+              key={title}
+              type="button"
+              onClick={() => move(i)}
+              aria-current={i === step ? "step" : undefined}
+              aria-label={`${i + 1}. ${title}`}
+              className={i === step ? "active" : ""}
+            >
+              {i < step ? <Check size={15} /> : i + 1}
+            </button>
+          ))}
+          <span>
+            <ShieldCheck size={15} />
+            {t.private}
+          </span>
+        </nav>
+        {step > 0 && (
+          <div
+            className="chat-history"
+            role="log"
+            aria-live="off"
+            aria-label={
+              en ? "Your conversation with Pip" : "Tu conversación con Pip"
+            }
+          >
+            {Object.entries(answers)
+              .filter(([i]) => Number(i) < step)
+              .map(([i, answer]) => (
+                <div key={i} className="chat-exchange">
+                  <p className="chat-past-question">
+                    <strong>Pip</strong>
+                    {questions[Number(i)]}
+                  </p>
+                  <p className="chat-user">
+                    <span>{en ? "You" : "Tú"}</span>
+                    {answerText(Number(i), answer)}
+                    <button type="button" onClick={() => move(Number(i))}>
+                      {en ? "Edit" : "Editar"}
+                    </button>
+                  </p>
+                </div>
+              ))}
+          </div>
+        )}
         <form
-          className="question-card"
+          className="question-card pip-question-card"
           onSubmit={(e) => {
             e.preventDefault();
             if (step < 5) {
@@ -209,9 +301,19 @@ export function Questionnaire() {
           <div className="progress-track">
             <span style={{ width: `${((step + 1) / 6) * 100}%` }} />
           </div>
-          <h2 id="question-title" tabIndex={-1}>
-            {titles[step]}
-          </h2>
+          <div className="pip-message" key={step}>
+            <Pip small />
+            <div className="pip-bubble">
+              <span className="eyebrow">PIP</span>
+              <h2 id="question-title" ref={titleRef} tabIndex={-1}>
+                {questions[step]}
+              </h2>
+              <p>{encouragement[step]}</p>
+            </div>
+          </div>
+          <p className="chat-reply-label">
+            {en ? "YOUR REPLY" : "TU RESPUESTA"}
+          </p>
           {step === 0 && (
             <div className="form-section">
               <p>{t.locationText}</p>
@@ -265,30 +367,37 @@ export function Questionnaire() {
                   );
                 })}
               </fieldset>
-              <label>
-                {t.maxTime}
-                <select {...register("maxMinutes", { valueAsNumber: true })}>
-                  {[10, 20, 30, 45].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {t.minutes}
-                    </option>
-                  ))}
-                  {![10, 20, 30, 45].includes(values.maxMinutes) && (
-                    <option value={values.maxMinutes}>
-                      {values.maxMinutes} {t.minutes}
-                    </option>
-                  )}
-                </select>
-              </label>
-              <label>
-                {t.custom} ({t.minutes})
-                <input
-                  type="number"
-                  min={1}
-                  max={180}
-                  {...register("maxMinutes", { valueAsNumber: true })}
-                />
-              </label>
+              <fieldset className="range-fieldset">
+                <legend>
+                  {t.travelRange} ({t.minutes})
+                </legend>
+                <div className="time-range">
+                  <SuggestedInput
+                    label={t.rangeFrom}
+                    value={minimum}
+                    onChange={(value) => {
+                      setMinimum(value);
+                      setError("");
+                    }}
+                    numeric
+                    suggestions={["0", "5", "10", "15", "20", "30"]}
+                  />
+                  <span className="range-dash" aria-hidden="true">
+                    –
+                  </span>
+                  <SuggestedInput
+                    label={t.rangeTo}
+                    value={maximum}
+                    onChange={(value) => {
+                      setMaximum(value);
+                      setError("");
+                    }}
+                    numeric
+                    suggestions={["10", "15", "20", "30", "45", "60", "90"]}
+                  />
+                </div>
+                <p className="small-text">{t.rangeHelp}</p>
+              </fieldset>
               <div className="notice">{t.travelNote}</div>
             </div>
           )}
@@ -357,22 +466,36 @@ export function Questionnaire() {
                       ))}
                     </select>
                   </label>
-                  <label>
-                    {t.start}
-                    <input
-                      type="time"
+                  <div className="time-range availability-range">
+                    <SuggestedInput
+                      label={t.start}
                       value={start}
-                      onChange={(e) => setStart(e.target.value)}
+                      onChange={setStart}
+                      suggestions={[
+                        "8:00 AM",
+                        "9:00 AM",
+                        "12:00 PM",
+                        "3:00 PM",
+                        "5:00 PM",
+                      ]}
                     />
-                  </label>
-                  <label>
-                    {t.end}
-                    <input
-                      type="time"
+                    <span className="range-dash" aria-hidden="true">
+                      –
+                    </span>
+                    <SuggestedInput
+                      label={t.end}
                       value={end}
-                      onChange={(e) => setEnd(e.target.value)}
+                      onChange={setEnd}
+                      suggestions={[
+                        "10:00 AM",
+                        "12:00 PM",
+                        "3:00 PM",
+                        "6:00 PM",
+                        "9:00 PM",
+                        "24:00",
+                      ]}
                     />
-                  </label>
+                  </div>
                 </div>
                 <button
                   type="button"

@@ -2,7 +2,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight, Globe, Leaf, Menu, X, Info, Heart } from "lucide-react";
+import {
+  ArrowUpRight,
+  Globe,
+  Leaf,
+  Menu,
+  X,
+  Info,
+  Heart,
+  LogOut,
+} from "lucide-react";
 import { useApp } from "./context";
 export function Logo() {
   return (
@@ -22,6 +31,23 @@ export function Header() {
   const { t, locale, setLocale, demo, loadError, refresh } = useApp();
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const householdPage =
+    path === "/find" || path === "/results" || path.startsWith("/providers/");
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
+  async function signOut() {
+    setSigningOut(true);
+    setSignOutError(false);
+    try {
+      const response = await fetch("/api/household/logout", { method: "POST" });
+      if (!response.ok) throw Error();
+      // A full navigation clears in-memory household answers and cached page state.
+      window.location.replace(locale === "en" ? "/login" : "/login?lang=es");
+    } catch {
+      setSignOutError(true);
+      setSigningOut(false);
+    }
+  }
   return (
     <>
       <a className="skip-link" href="#main">
@@ -52,6 +78,18 @@ export function Header() {
             ))}
           </nav>
           <div className="header-actions">
+            {householdPage && (
+              <button
+                type="button"
+                className="language sign-out"
+                aria-label={locale === "en" ? "Sign out" : "Cerrar sesión"}
+                disabled={signingOut}
+                onClick={signOut}
+              >
+                <LogOut size={17} />
+                <span>{locale === "en" ? "Sign out" : "Cerrar sesión"}</span>
+              </button>
+            )}
             <button
               className="language"
               onClick={() => setLocale(locale === "en" ? "es" : "en")}
@@ -77,6 +115,13 @@ export function Header() {
           </div>
         </div>
       </header>
+      {signOutError && (
+        <p className="container error-message" role="alert">
+          {locale === "en"
+            ? "Sign-out failed. Please try again."
+            : "No se pudo cerrar sesión. Inténtalo otra vez."}
+        </p>
+      )}
       {demo && (
         <div className="demo-bar">
           <div className="container">

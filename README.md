@@ -1,5 +1,7 @@
 # PantryFit
 
+The app now opens with email-code sign-in and Pip, a sprout guide who asks the household questions. Local preview uses the labeled demo button. Real email sign-in requires configuration; see [Login security handoff](docs/LOGIN_SECURITY_HANDOFF.md) for setup, launch gates, and a reusable security checklist.
+
 **Food assistance that fits your life.** A functional development prototype for the Congressional App Challenge, starting with the Bronx’s 10468 ZIP code.
 
 PantryFit compares household schedules, travel limits, cooking equipment, refrigeration, and dietary needs with documented services. It explains both compatibility and missing information. No household account is required.
