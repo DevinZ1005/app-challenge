@@ -19,7 +19,7 @@ export const en = {
     "Discover nearby food services based on when you can visit, how far you can travel, and what your household can use.",
   cta: "Find Food Near Me",
   secondary: "How PantryFit Works",
-  noAccount: "A little help from Pip",
+  noAccount: "No account needed",
   private: "Your answers stay private",
   bilingual: "English & Español",
   built: "Built around your real life",
@@ -81,17 +81,10 @@ export const en = {
   walking: "Walking",
   transit: "Public transportation",
   either: "Either",
-  maxTime: "Travel time",
-  travelRange: "Preferred travel time range",
-  rangeFrom: "From",
-  rangeTo: "To",
-  rangeHelp:
-    "Type minutes or choose an example. Use 0 to include shorter trips.",
-  rangeError:
-    "Enter a travel range from 0 to 180 minutes. The end must be at least the start and greater than zero.",
+  maxTime: "Maximum travel time",
   minutes: "minutes",
   travelNote:
-    "Your results include an approximate walking preview. Confirmed route times are needed to check travel compatibility.",
+    "Routing is not connected in this prototype. Travel compatibility will be marked unknown; we never substitute straight-line distance for a journey time.",
   availabilityTitle: "When are you usually available?",
   availabilityText:
     "Choose any days and time periods. Matches consider the next seven days in New York time.",
@@ -169,7 +162,7 @@ export const en = {
   list: "List view",
   map: "Map",
   mapNote:
-    "Select a listing to preview an approximate route. Demo locations and starting points are fictional.",
+    "A live map is unavailable: demo coordinates are illustrative and unverified. Use the accessible service list.",
   distanceUnknown: "Distance not verified",
   travelUnknown: "Travel estimate unavailable",
   hours: "Pickup hours",
@@ -187,7 +180,7 @@ export const en = {
   offerings: "Food offerings",
   accessibility: "Accessibility",
   accessibilityUnknown: "Accessibility information has not been confirmed.",
-  directions: "Get directions",
+  directions: "Get Directions",
   noDirections: "Directions are disabled for fictional locations.",
   call: "Call provider",
   backResults: "Back to results",
@@ -197,9 +190,9 @@ export const en = {
     "No pickup hours overlap with your availability in the next seven days.",
   scheduleUnknown: "Pickup hours are missing or not confirmed.",
   travelCompatible:
-    "A current, reliable journey estimate is within your preferred travel range.",
+    "A current, reliable journey estimate is within your travel limit.",
   travelIncompatible:
-    "The journey estimate falls outside your preferred travel range.",
+    "The journey estimate exceeds your selected travel limit.",
   travelUnknownReason:
     "A reliable journey estimate is unavailable. Confirm the route and travel time.",
   storageCompatible:
@@ -234,6 +227,75 @@ export const en = {
   providerIntro:
     "Participating organizations can propose updates to hours, food offerings, and contact information. An administrator reviews changes before publication.",
   providerCTA: "Provider sign in",
+  applicationLink: "Apply to represent an organization",
+  reviewApplicationsTitle: "Provider applications",
+  reviewStatusFilter: "Filter applications by status",
+  reviewAll: "All statuses",
+  reviewSubmitted: "Submitted",
+  reviewOpen: "View application",
+  reviewEmpty: "No applications match this filter.",
+  reviewUnavailable:
+    "Application review is temporarily unavailable. Please try again later.",
+  reviewRefresh: "Refresh applications",
+  reviewPrevious: "Previous page",
+  reviewNext: "Next page",
+  reviewPage: "Page",
+  reviewClose: "Close application",
+  reviewBy: "Reviewed by",
+  reviewAt: "Reviewed at",
+  reviewReason: "Review reason (10–2,000 characters)",
+  reviewFinal:
+    "This decision is final for this application. It cannot be reviewed again.",
+  reviewNoAccess:
+    "Approval records affiliation only. It creates no account, invitation, organization membership, or dashboard access.",
+  reviewSelf: "A different administrator must review your own application.",
+  reviewApproveTitle: "Approve this application?",
+  reviewRejectTitle: "Reject this application?",
+  reviewConfirmApprove: "Confirm approval",
+  reviewConfirmReject: "Confirm rejection",
+  reviewInvalid:
+    "Check the review reason and all required independent verification fields.",
+  reviewConflict:
+    "Another decision was recorded. Reload the application to see it.",
+  reviewForbidden:
+    "Administrator permission and an independent reviewer are required.",
+  reviewSaved: "Decision recorded. No account or access was created.",
+  reviewOfficialSource: "Official contact source URL (HTTPS)",
+  reviewContactMethod: "Independent contact method",
+  reviewPhone: "Phone call",
+  reviewEmail: "Email",
+  reviewOfficialContact: "Official phone or email contacted",
+  reviewContactTime: "Contacted at (your local time)",
+  reviewEvidenceHint:
+    "Find the organization's official contact independently. Contact the organization to confirm this applicant's authority; do not rely on the applicant's email or claims alone.",
+  reviewAttestation:
+    "I independently contacted the organization and confirmed this applicant is authorized to represent it.",
+  applicationApproved: "Provider application approved",
+  applicationRejected: "Provider application rejected",
+  applicationTitle: "Apply to join PantryFit",
+  applicationIntro:
+    "Represent a food pantry or food assistance organization? Apply without creating an account. An administrator must independently confirm your affiliation before access can be granted.",
+  applicationOrganization: "Organization name",
+  applicationAddress: "Organization address",
+  applicationContact: "Contact person's name",
+  applicationEmail: "Contact email",
+  applicationPhone: "Contact phone (optional)",
+  applicationWebsite: "Organization website (optional, HTTPS)",
+  applicationDescription: "Short organization description",
+  applicationDescriptionHint:
+    "20–1,000 characters. Describe the food assistance you provide; do not include sensitive personal information.",
+  applicationPrivacy:
+    "Your contact details will be stored privately for administrator review. Applying does not create an account, publish a listing, or grant dashboard access.",
+  applicationSubmit: "Submit application",
+  applicationSubmitting: "Submitting…",
+  applicationSuccessTitle: "Application received for review",
+  applicationSuccess:
+    "If an application for this organization and email is already pending, it remains in the review queue. Your affiliation still needs independent verification. No account or access has been granted.",
+  applicationInvalid: "Check the application fields and try again.",
+  applicationInvalidField: "Check this field and its length or format.",
+  applicationLimited: "Too many submissions. Please wait before trying again.",
+  applicationUnavailable:
+    "Applications are temporarily unavailable. Your entries are still here; please try again later.",
   accessText:
     "To request access to a real listing, contact the student team through their verified project contact. Association with an organization must be independently approved. No real organizations are onboarded in this demo.",
   loginTitle: "Welcome back.",
@@ -242,6 +304,11 @@ export const en = {
   login: "Sign in",
   logout: "Sign out",
   loginError: "Sign-in failed. Check your credentials and try again.",
+  accountUnavailable:
+    "We could not load your account permissions. Try again later.",
+  unaffiliatedTitle: "Organization access not approved",
+  unaffiliatedText:
+    "You are signed in, but you do not have approved access to an organization. Administrator approval is required before you can manage listings.",
   demoLogin: "Local demo accounts",
   demoLoginText:
     "Provider: provider@demo.pantryfit.test · Administrator: admin@demo.pantryfit.test · Password for both: PantryFit-demo-2026. These accounts can only change fictional demo records.",
@@ -271,9 +338,9 @@ export const en = {
   loginRequired: "Sign in to access this page.",
   privacyTitle: "Useful help. Less personal data.",
   privacyText:
-    "Sign in with an email code to meet Pip. When live sign-in is enabled, Supabase processes your email address and authentication information. The local demo does not require personal details. Household answers and approximate location stay in this tab’s memory and clear on reload or sign-out. Pip uses prepared prompts and tips; your answers are not sent to an AI service or providers. We do not ask for names, income or immigration status.",
+    "You can search without an account. Household answers and approximate location stay in page memory and are cleared when you close or refresh this tab. We do not collect names, income, immigration status, household profiles, or advertising analytics. Your preferences are never sent to providers.",
   privacyMore:
-    "Optional geolocation requires browser permission. Opening an embedded map loads OpenStreetMap tiles and shares your IP address and viewed map area with that service. Directions to real, verified providers open OpenStreetMap and are subject to its privacy policy. Provider accounts use authenticated sessions. Demo sessions use an HTTP-only cookie; their fictional updates are saved on this server for demonstration. Hosting services may retain standard access logs. Do not enter sensitive information in feedback or provider notes.",
+    "Optional geolocation requires browser permission. Directions links send the service's public address to Google Maps and are subject to Google's privacy policy. PantryFit does not request your location to open directions. Provider accounts use authenticated sessions. Demo sessions use an HTTP-only cookie; their fictional updates are saved on this server for demonstration. Hosting services may retain standard access logs. Do not enter sensitive information in feedback or provider notes.",
   aboutTitle: "Built with care. Still being built.",
   aboutText:
     "PantryFit is a development prototype for a student Congressional App Challenge project, initially focused on ZIP code 10468. Practical access barriers are hypotheses for local research, not established statistics about this neighborhood. No partnerships, interviews, or community impact are claimed.",
@@ -309,7 +376,7 @@ export const es: typeof en = {
     "Descubre servicios cercanos según cuándo puedes ir, cómo puedes viajar y qué alimentos puede usar tu hogar.",
   cta: "Buscar alimentos cerca de mí",
   secondary: "Cómo funciona PantryFit",
-  noAccount: "Un poco de ayuda de Pip",
+  noAccount: "Sin crear una cuenta",
   private: "Tus respuestas son privadas",
   bilingual: "English & Español",
   built: "Pensado para tu vida diaria",
@@ -373,17 +440,10 @@ export const es: typeof en = {
   walking: "A pie",
   transit: "Transporte público",
   either: "Cualquiera",
-  maxTime: "Tiempo de viaje",
-  travelRange: "Intervalo de viaje preferido",
-  rangeFrom: "Desde",
-  rangeTo: "Hasta",
-  rangeHelp:
-    "Escribe minutos o elige un ejemplo. Usa 0 para incluir viajes más cortos.",
-  rangeError:
-    "Introduce de 0 a 180 minutos. El final debe ser mayor que cero e igual o posterior al inicio.",
+  maxTime: "Tiempo máximo de viaje",
   minutes: "minutos",
   travelNote:
-    "Los resultados incluyen una vista aproximada a pie. Se necesitan tiempos de ruta confirmados para evaluar la compatibilidad del viaje.",
+    "El prototipo no tiene un servicio de rutas conectado. El tiempo de viaje se marcará como desconocido; nunca lo sustituimos por distancia en línea recta.",
   availabilityTitle: "¿Cuándo sueles estar disponible?",
   availabilityText:
     "Elige días y períodos. Se consideran los próximos siete días, en la zona horaria de Nueva York.",
@@ -462,7 +522,7 @@ export const es: typeof en = {
   list: "Lista",
   map: "Mapa",
   mapNote:
-    "Elige un servicio para ver una ruta aproximada. Las ubicaciones y puntos de inicio de ejemplo son ficticios.",
+    "El mapa no está disponible: las coordenadas de ejemplo son ilustrativas y no están verificadas. Usa la lista accesible.",
   distanceUnknown: "Distancia sin verificar",
   travelUnknown: "Tiempo de viaje no disponible",
   hours: "Horarios de recogida",
@@ -491,9 +551,8 @@ export const es: typeof en = {
     "Ningún horario coincide con tu disponibilidad en los próximos siete días.",
   scheduleUnknown: "Faltan horarios o no están confirmados.",
   travelCompatible:
-    "Una estimación actual y confiable está dentro de tu intervalo preferido.",
-  travelIncompatible:
-    "La estimación de viaje está fuera de tu intervalo preferido.",
+    "Una estimación de viaje actual y confiable está dentro de tu límite.",
+  travelIncompatible: "La estimación de viaje supera tu límite.",
   travelUnknownReason:
     "No hay una estimación de viaje confiable. Confirma la ruta y el tiempo.",
   storageCompatible: "Una opción documentada no requiere refrigeración.",
@@ -526,6 +585,77 @@ export const es: typeof en = {
   providerIntro:
     "Las organizaciones pueden proponer cambios a horarios, alimentos y datos de contacto. Un administrador revisa los cambios antes de publicarlos.",
   providerCTA: "Acceso para proveedores",
+  applicationLink: "Solicitar representar a una organización",
+  reviewApplicationsTitle: "Solicitudes de proveedores",
+  reviewStatusFilter: "Filtrar solicitudes por estado",
+  reviewAll: "Todos los estados",
+  reviewSubmitted: "Enviada",
+  reviewOpen: "Ver solicitud",
+  reviewEmpty: "No hay solicitudes con este filtro.",
+  reviewUnavailable:
+    "La revisión de solicitudes no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+  reviewRefresh: "Actualizar solicitudes",
+  reviewPrevious: "Página anterior",
+  reviewNext: "Página siguiente",
+  reviewPage: "Página",
+  reviewClose: "Cerrar solicitud",
+  reviewBy: "Revisada por",
+  reviewAt: "Fecha de revisión",
+  reviewReason: "Motivo de la decisión (10–2.000 caracteres)",
+  reviewFinal:
+    "Esta decisión es definitiva para esta solicitud. No se puede revisar de nuevo.",
+  reviewNoAccess:
+    "La aprobación solo registra la afiliación. No crea una cuenta, invitación, membresía ni acceso al panel.",
+  reviewSelf: "Otro administrador debe revisar tu propia solicitud.",
+  reviewApproveTitle: "¿Aprobar esta solicitud?",
+  reviewRejectTitle: "¿Rechazar esta solicitud?",
+  reviewConfirmApprove: "Confirmar aprobación",
+  reviewConfirmReject: "Confirmar rechazo",
+  reviewInvalid:
+    "Revisa el motivo y todos los campos de verificación independiente requeridos.",
+  reviewConflict:
+    "Ya se registró otra decisión. Vuelve a cargar la solicitud para verla.",
+  reviewForbidden:
+    "Se requieren permisos de administrador y un revisor independiente.",
+  reviewSaved:
+    "Decisión registrada. No se creó una cuenta ni se concedió acceso.",
+  reviewOfficialSource: "URL de la fuente oficial del contacto (HTTPS)",
+  reviewContactMethod: "Método de contacto independiente",
+  reviewPhone: "Llamada telefónica",
+  reviewEmail: "Correo electrónico",
+  reviewOfficialContact: "Teléfono o correo oficial contactado",
+  reviewContactTime: "Fecha de contacto (tu hora local)",
+  reviewEvidenceHint:
+    "Busca el contacto oficial de la organización de forma independiente. Contacta a la organización para confirmar la autoridad del solicitante; no te bases solo en su correo o sus declaraciones.",
+  reviewAttestation:
+    "Contacté a la organización de forma independiente y confirmé que esta persona está autorizada para representarla.",
+  applicationApproved: "Solicitud de proveedor aprobada",
+  applicationRejected: "Solicitud de proveedor rechazada",
+  applicationTitle: "Solicita unirte a PantryFit",
+  applicationIntro:
+    "¿Representas una despensa o una organización de asistencia alimentaria? Solicita acceso sin crear una cuenta. Un administrador debe confirmar tu afiliación de forma independiente antes de conceder acceso.",
+  applicationOrganization: "Nombre de la organización",
+  applicationAddress: "Dirección de la organización",
+  applicationContact: "Nombre de la persona de contacto",
+  applicationEmail: "Correo electrónico de contacto",
+  applicationPhone: "Teléfono de contacto (opcional)",
+  applicationWebsite: "Sitio web de la organización (opcional, HTTPS)",
+  applicationDescription: "Descripción breve de la organización",
+  applicationDescriptionHint:
+    "Entre 20 y 1.000 caracteres. Describe la asistencia alimentaria que ofrecen; no incluyas información personal sensible.",
+  applicationPrivacy:
+    "Tus datos de contacto se guardarán de forma privada para revisión administrativa. La solicitud no crea una cuenta, publica un registro ni concede acceso al panel.",
+  applicationSubmit: "Enviar solicitud",
+  applicationSubmitting: "Enviando…",
+  applicationSuccessTitle: "Solicitud recibida para revisión",
+  applicationSuccess:
+    "Si ya hay una solicitud pendiente para esta organización y correo electrónico, permanece en la cola de revisión. Tu afiliación aún necesita verificación independiente. No se ha creado una cuenta ni concedido acceso.",
+  applicationInvalid: "Revisa los datos de la solicitud e inténtalo de nuevo.",
+  applicationInvalidField: "Revisa este campo y su longitud o formato.",
+  applicationLimited:
+    "Demasiadas solicitudes. Espera antes de volver a intentarlo.",
+  applicationUnavailable:
+    "Las solicitudes no están disponibles temporalmente. Tus datos siguen aquí; inténtalo más tarde.",
   accessText:
     "Para solicitar acceso a un registro real, contacta al equipo estudiantil por su contacto verificado. La asociación debe aprobarse de forma independiente. Este ejemplo no incluye organizaciones reales.",
   loginTitle: "Te damos la bienvenida.",
@@ -535,6 +665,11 @@ export const es: typeof en = {
   logout: "Cerrar sesión",
   loginError:
     "No se pudo iniciar sesión. Revisa tus datos e inténtalo otra vez.",
+  accountUnavailable:
+    "No pudimos cargar los permisos de tu cuenta. Inténtalo más tarde.",
+  unaffiliatedTitle: "Acceso a la organización no aprobado",
+  unaffiliatedText:
+    "Has iniciado sesión, pero no tienes acceso aprobado a una organización. Se requiere la aprobación de un administrador antes de que puedas gestionar registros.",
   demoLogin: "Cuentas locales de demostración",
   demoLoginText:
     "Proveedor: provider@demo.pantryfit.test · Administrador: admin@demo.pantryfit.test · Contraseña para ambos: PantryFit-demo-2026. Estas cuentas solo modifican registros ficticios.",
@@ -564,9 +699,9 @@ export const es: typeof en = {
   loginRequired: "Inicia sesión para acceder.",
   privacyTitle: "Ayuda útil. Menos datos personales.",
   privacyText:
-    "Inicia sesión con un código por correo para conocer a Pip. Cuando el acceso real está habilitado, Supabase procesa tu correo y la información de autenticación. La demo local no pide datos personales. Tus respuestas y ubicación aproximada quedan en la memoria de esta pestaña y se borran al recargar o cerrar sesión. Pip usa preguntas y consejos preparados; no enviamos tus respuestas a una IA ni a proveedores. No pedimos nombres, ingresos ni estatus migratorio.",
+    "Puedes buscar sin cuenta. Tus respuestas y ubicación aproximada se guardan en la memoria de la página y se borran al cerrar o recargar. No recopilamos nombres, ingresos, estatus migratorio, perfiles del hogar ni datos publicitarios. No enviamos tus preferencias a los proveedores.",
   privacyMore:
-    "La geolocalización requiere permiso. Al abrir un mapa integrado, OpenStreetMap recibe tu dirección IP y el área del mapa que ves. Las indicaciones a proveedores reales verificados abren OpenStreetMap y están sujetas a su política. Las cuentas de proveedores usan sesiones autenticadas. Las sesiones de ejemplo usan una cookie HTTP-only; los cambios ficticios se guardan en el servidor para la demostración. El alojamiento puede guardar registros de acceso estándar. No incluyas información sensible en comentarios o notas.",
+    "La geolocalización requiere permiso. Los enlaces de cómo llegar envían la dirección pública del servicio a Google Maps y están sujetos a la política de privacidad de Google. PantryFit no solicita tu ubicación para abrir las indicaciones. Las cuentas de proveedores usan sesiones autenticadas. Las sesiones de ejemplo usan una cookie HTTP-only; los cambios ficticios se guardan en el servidor para la demostración. El alojamiento puede guardar registros de acceso estándar. No incluyas información sensible en comentarios o notas.",
   aboutTitle: "Hecho con cuidado. Aún en desarrollo.",
   aboutText:
     "PantryFit es un prototipo para un proyecto estudiantil del Congressional App Challenge, centrado inicialmente en 10468. Las barreras prácticas son hipótesis para investigación local, no estadísticas comprobadas del vecindario. No se afirman alianzas, entrevistas ni impacto comunitario.",

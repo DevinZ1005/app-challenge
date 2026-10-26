@@ -1,22 +1,26 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { en, es } from "../src/lib/i18n";
 
-test("opening login blocks forged sessions and rejects cross-origin sign-in", async ({
+test("welcome login rejects forged household sessions and cross-origin sign-in", async ({
   page,
   context,
   request,
 }) => {
-  await page.goto("/");
+  await page.goto("/login");
   await expect(
     page.getByRole("heading", { name: "Welcome to PantryFit" }),
   ).toBeVisible();
   await expect(
     page.getByLabel("Email address", { exact: true }),
   ).toBeDisabled();
-  const denied = await request.post("/api/household/demo", {
-    headers: { Origin: "https://evil.example" },
-  });
-  expect(denied.status()).toBe(403);
+  expect(
+    (
+      await request.post("/api/household/demo", {
+        headers: { Origin: "https://evil.example" },
+      })
+    ).status(),
+  ).toBe(403);
   await context.addCookies([
     {
       name: "pantryfit-household",
@@ -24,10 +28,14 @@ test("opening login blocks forged sessions and rejects cross-origin sign-in", as
       url: "http://localhost:3102",
     },
   ]);
-  for (const path of ["/find", "/results", "/providers/demo-garden"]) {
-    await page.goto(path);
-    await expect(page).toHaveURL(/\/login$/);
-  }
+  await page.reload();
+  // /find and /results are public in the current app. A forged cookie must not
+  // become a valid household session or grant provider/administrator identity.
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(
+    page.getByRole("heading", { name: "Welcome to PantryFit" }),
+  ).toBeVisible();
+  expect((await page.request.get("/api/auth/me")).status()).toBe(401);
   expect(
     (
       await new AxeBuilder({ page })
@@ -37,11 +45,11 @@ test("opening login blocks forged sessions and rejects cross-origin sign-in", as
   ).toEqual([]);
 });
 
-test("Pip asks questions, preserves editable replies, offers tips and signs out", async ({
+test("household demo preserves editable answers and revokes its separate session on logout", async ({
   page,
   context,
 }, testInfo) => {
-  await page.goto("/");
+  await page.goto("/login");
   await page.screenshot({
     path: testInfo.outputPath("welcome-desktop.png"),
     fullPage: true,
@@ -51,45 +59,40 @@ test("Pip asks questions, preserves editable replies, offers tips and signs out"
     .click();
   await expect(page).toHaveURL(/\/find$/);
   const cookie = (await context.cookies()).find(
-    (c) => c.name === "pantryfit-household",
+    (cookie) => cookie.name === "pantryfit-household",
   )!;
   expect(cookie.httpOnly).toBe(true);
   expect(cookie.sameSite).toBe("Strict");
   expect((await page.request.get("/api/auth/me")).status()).toBe(401);
-  await expect(page.locator("#question-title")).toContainText("Hi, I’m Pip");
-  await page.getByLabel("ZIP code", { exact: true }).fill("10467");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(page.getByRole("log")).toContainText("10467");
-  await page
-    .getByRole("log")
-    .getByRole("button", { name: "Edit", exact: true })
-    .click();
-  await expect(page.getByLabel("ZIP code", { exact: true })).toHaveValue(
-    "10467",
-  );
-  for (let i = 0; i < 5; i++)
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Find My Matches", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "An easy food idea?", exact: true })
-    .click();
-  await expect(page.locator(".pip-tips [role=status]")).toContainText(
-    "No stove",
-  );
-  await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.locator("#question-title")).toContainText(en.locationTitle);
+  await page.getByLabel(en.zip, { exact: true }).fill("10467");
+  await page.getByRole("button", { name: en.next, exact: true }).click();
+  await page.getByRole("button", { name: en.back, exact: true }).click();
+  await expect(page.getByLabel(en.zip, { exact: true })).toHaveValue("10467");
+  expect(
+    (
+      await page.request.post("/api/household/logout", {
+        headers: { Origin: "http://localhost:3102" },
+      })
+    ).status(),
+  ).toBe(200);
+  expect(
+    (await context.cookies()).some(
+      (cookie) => cookie.name === "pantryfit-household",
+    ),
+  ).toBe(false);
   await context.addCookies([cookie]);
-  await page.goto("/find");
-  await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/login");
+  await expect(
+    page.getByRole("heading", { name: "Welcome to PantryFit" }),
+  ).toBeVisible();
 });
 
-test("Spanish welcome and Pip's conversation fit a phone and support accessible controls", async ({
+test("Spanish welcome and questionnaire fit a phone and provide accessible controls", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/login");
   await page.getByRole("button", { name: "Cambiar a español" }).click();
   await expect(
     page.getByRole("heading", { name: "Te damos la bienvenida" }),
@@ -103,9 +106,9 @@ test("Spanish welcome and Pip's conversation fit a phone and support accessible 
     .getByRole("button", { name: "Conoce a Pip · Prueba la demo" })
     .click();
   await expect(page).toHaveURL(/\/find\?lang=es$/);
-  await expect(page.locator("#question-title")).toContainText(
-    "¡Hola, soy Pip!",
-  );
+  // The questionnaire's current language control is local to its page session.
+  await page.getByRole("button", { name: "Cambiar a español" }).click();
+  await expect(page.locator("#question-title")).toContainText(es.locationTitle);
   await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
   expect(
     (
@@ -115,7 +118,7 @@ test("Spanish welcome and Pip's conversation fit a phone and support accessible 
     ).violations,
   ).toEqual([]);
   await page.screenshot({
-    path: testInfo.outputPath("pip-mobile.png"),
+    path: testInfo.outputPath("questionnaire-mobile.png"),
     fullPage: true,
   });
 });

@@ -65,6 +65,17 @@ it("offers first listing creation with real source requirements in an empty dire
   expect(source.required).toBe(true);
   expect(source.pattern).toBe("https://.*");
 });
+
+it("shows an unaffiliated access state without any provider or administrator tools", async () => {
+  setup([structuredClone(demoProviders[0])], "unaffiliated");
+  await screen.findByText("Organization access not approved");
+  expect(screen.queryByText("Add a listing")).toBeNull();
+  expect(
+    screen.queryByRole("button", { name: "Submit for review" }),
+  ).toBeNull();
+  expect(screen.queryByText("Data quality review")).toBeNull();
+  expect(screen.getByRole("button", { name: "Sign out" })).toBeTruthy();
+});
 it("distinguishes a failed directory load and hides administrator creation for providers", async () => {
   setup([], "provider", true);
   await waitFor(() => expect(screen.queryByText("Loading…")).toBeNull());
@@ -101,4 +112,35 @@ it("loads midnight hours and submits the original 1440 minute boundary", async (
     (screen.getByLabelText("End of day (midnight)") as HTMLInputElement)
       .checked,
   ).toBe(true);
+});
+
+it("sends selected fields and public evidence separately from private review notes", async () => {
+  const fetcher = setup([structuredClone(demoProviders[0])]);
+  await screen.findByText("Data quality review");
+  const checkbox = screen.getByRole("checkbox", { name: "Pickup hours" });
+  fireEvent.click(checkbox);
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Public evidence URL (optional)" }),
+    { target: { value: "https://example.test/hours" } },
+  );
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Verification or review note" }),
+    {
+      target: { value: "Private evidence review notes" },
+    },
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Record review" }));
+  await waitFor(() =>
+    expect(
+      fetcher.mock.calls.some(([url]) => url === "/api/verification"),
+    ).toBe(true),
+  );
+  const sent = fetcher.mock.calls.find(
+    ([url]) => url === "/api/verification",
+  )![1]!;
+  expect(JSON.parse(sent.body as string)).toMatchObject({
+    fields: ["hours"],
+    sourceUrl: "https://example.test/hours",
+    notes: "Private evidence review notes",
+  });
 });

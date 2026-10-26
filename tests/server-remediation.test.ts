@@ -30,6 +30,7 @@ const admin = {
   id: "admin-id",
   email: "admin@test",
   role: "admin" as const,
+  organizationIds: [],
   programIds: [],
   token: "test",
 };

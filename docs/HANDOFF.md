@@ -1,7 +1,5 @@
 # PantryFit startup PM handoff
 
-Update (October 25, 2026): household entry now uses email-code login and Pip’s guided conversation. The local demo is explicitly labeled. [LOGIN_SECURITY_HANDOFF.md](LOGIN_SECURITY_HANDOFF.md) supersedes earlier descriptions of anonymous household entry and lists outstanding production authentication requirements.
-
 Reviewed October 18, 2026. Decision: continue the fictional demo and prepare a controlled pilot; **hold public launch as a real food-assistance directory**. The seven LAUNCH requirements in `launch-checklist.json` remain open. Roles below are proposed responsibilities, not people already assigned.
 
 ## Product brief and scope

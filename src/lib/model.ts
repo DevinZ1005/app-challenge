@@ -80,7 +80,15 @@ export interface ServiceProgram {
   eligibility: Bilingual | null;
   eligibilityStatus: "unrestricted" | "restricted" | "unknown";
 }
+export type VerificationField =
+  "hours" | "offerings" | "eligibility" | "phone" | "coordinates";
+export interface FieldVerification {
+  checkedAt: string;
+  method: "phone" | "official_source" | "in_person";
+  sourceUrl: string | null;
+}
 export interface Provider {
+  verification?: Partial<Record<VerificationField, FieldVerification>>;
   id: string;
   organizationId?: string;
   revision?: number;

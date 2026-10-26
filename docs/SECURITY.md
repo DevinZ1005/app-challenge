@@ -1,7 +1,5 @@
 # Security design and review limits
 
-Update (October 25, 2026): household entry now uses email-code login and Pip’s guided conversation. The local demo is explicitly labeled. [LOGIN_SECURITY_HANDOFF.md](LOGIN_SECURITY_HANDOFF.md) supersedes earlier descriptions of anonymous household entry and lists outstanding production authentication requirements.
-
 The public app sends no household preferences to the backend. Anonymous GET requests return published provider/service data. Geolocation is optional, rounded, held in memory, and never written to the server.
 
 ## Authorization boundaries

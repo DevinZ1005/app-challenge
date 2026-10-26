@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
+  outputFileTracingRoot: process.cwd(),
   poweredByHeader: false,
-  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+  distDir:
+    process.env.NODE_ENV === "development"
+      ? process.env.PANTRYFIT_BROWSER_TEST === "1"
+        ? ".cache/next-e2e"
+        : ".next-dev"
+      : ".next",
   async headers() {
     return [
       {

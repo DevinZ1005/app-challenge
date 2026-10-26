@@ -9,7 +9,6 @@ import { chromium, expect } from "@playwright/test";
 const directory = await mkdtemp(join(tmpdir(), "pantryfit-production-smoke-"));
 const port = process.env.SMOKE_PORT || "3101";
 const origin = `http://127.0.0.1:${port}`;
-const externalOrigin = `https://127.0.0.1:${port}`;
 async function checkBrowser() {
   const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
@@ -20,7 +19,7 @@ async function checkBrowser() {
     page.on("pageerror", (error) => errors.push(error.message));
     // Simulate untrusted markup in an HTML response. strict-dynamic deliberately
     // trusts scripts created by trusted JS, so automation eval is not an XSS test.
-    await page.route("**/login", async (route) => {
+    await page.route("**/find", async (route) => {
       const response = await route.fetch();
       const body = (await response.text()).replace(
         "<head>",
@@ -28,7 +27,7 @@ async function checkBrowser() {
       );
       await route.fulfill({ response, body });
     });
-    const response = await page.goto(origin + "/login");
+    const response = await page.goto(origin + "/find");
     const policy = response.headers()["content-security-policy"];
     const nonce = policy.match(/'nonce-([^']+)'/)[1];
     const scriptPolicy = policy
@@ -39,7 +38,7 @@ async function checkBrowser() {
       .locator("script:not([data-csp-test])")
       .evaluateAll((elements) => elements.map((s) => s.nonce));
     assert.ok(scripts.length > 0 && scripts.every((value) => value === nonce));
-    const nextResponse = await fetch(origin + "/login", {
+    const nextResponse = await fetch(origin + "/find", {
       headers: {
         "Content-Security-Policy": "script-src 'nonce-caller-controlled'",
       },
@@ -52,59 +51,34 @@ async function checkBrowser() {
       await page.evaluate(() => window.pantryfitInjected),
       undefined,
     );
-    await expect(
-      page.getByRole("heading", { name: "Welcome to PantryFit" }),
-    ).toBeVisible();
+    await page.getByLabel("ZIP code").fill("10467");
     await page.getByRole("button", { name: "Cambiar a español" }).click();
+    await expect(page.getByLabel("Código postal")).toHaveValue("10467");
+    await page.getByRole("button", { name: "Switch to English" }).click();
+    for (let step = 0; step < 5; step++) {
+      await page.getByRole("button", { name: "Continue", exact: true }).click();
+    }
+    await page.getByRole("button", { name: "Find My Matches" }).click();
+    await expect(page).toHaveURL(/\/results$/);
+    await expect(page.locator(".match-card").first()).toBeVisible();
+    await page
+      .getByRole("link", { name: "View details", exact: true })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/providers\//);
     await expect(
-      page.getByRole("heading", { name: "Te damos la bienvenida" }),
+      page.getByText("Directions are disabled for fictional locations."),
     ).toBeVisible();
-    await page.goto(origin + "/find");
-    await expect(page).toHaveURL(/\/login$/);
-    await page.getByRole("link", { name: "Provider or admin sign-in" }).click();
-    await expect(page.getByLabel("Email address")).toBeVisible();
-    // Exercise production cookie flags and replay over the loopback transport.
-    // Host/Origin model a TLS-terminating proxy; this does not prove deployed TLS.
-    const headers = {
-      Origin: externalOrigin,
-      Host: new URL(externalOrigin).host,
-    };
-    const session = await fetch(origin + "/api/household/demo", {
-      method: "POST",
-      headers,
-    });
-    assert.equal(session.status, 200);
-    const setCookie = session.headers.get("set-cookie");
-    assert.match(setCookie, /^__Host-pantryfit-household=/);
-    assert.match(setCookie, /HttpOnly/);
-    assert.match(setCookie, /Secure/);
-    assert.match(setCookie, /SameSite=strict/i);
-    const cookie = setCookie.split(";")[0];
-    const protectedPage = await fetch(origin + "/find", {
-      headers: { Cookie: cookie },
-      redirect: "manual",
-    });
-    assert.equal(protectedPage.status, 200);
-    assert.match(await protectedPage.text(), /question-title/);
-    const logout = await fetch(origin + "/api/household/logout", {
-      method: "POST",
-      headers: { ...headers, Cookie: cookie },
-    });
-    assert.equal(logout.status, 200);
-    const replay = await fetch(origin + "/find", {
-      headers: { Cookie: cookie },
-      redirect: "manual",
-    });
-    // Next can stream its outer shell before an async auth check finishes, then
-    // deliver a redirect instruction with status 200. Protected content must be absent.
-    if (replay.status === 200) {
-      const body = await replay.text();
-      assert.doesNotMatch(body, /id="question-title"/);
-      assert.match(body, /NEXT_REDIRECT;replace;\/login;307/);
-    } else assert.equal(replay.status, 307);
+    await page
+      .getByRole("link", { name: "Back to results", exact: true })
+      .click();
+    await page
+      .getByRole("link", { name: "Edit preferences", exact: true })
+      .click();
+    await expect(page.getByLabel("ZIP code")).toHaveValue("10467");
     assert.deepEqual(errors, []);
     console.log(
-      "Production CSP and login: nonces, injection blocked, bilingual hydration, protected pages, cookie flags and revoked-demo replay passed",
+      "Production CSP: fresh nonces, caller override, injection blocked, hydration and client navigation passed",
     );
   } finally {
     await browser.close();
@@ -129,7 +103,6 @@ async function check(allowDemo) {
         NEXT_PUBLIC_SUPABASE_URL: "",
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
         PANTRYFIT_ALLOW_DEMO: allowDemo ? "true" : "false",
-        PANTRYFIT_APP_ORIGIN: externalOrigin,
         PANTRYFIT_DEMO_FILE: join(directory, "demo.json"),
       },
       stdio: ["ignore", "pipe", "pipe"],

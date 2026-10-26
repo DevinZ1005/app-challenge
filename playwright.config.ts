@@ -30,6 +30,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
       NEXT_TELEMETRY_DISABLED: "1",
+      PANTRYFIT_BROWSER_TEST: "1",
       PANTRYFIT_DEMO_FILE: process.env.PANTRYFIT_E2E_FILE,
     },
     timeout: 120000,

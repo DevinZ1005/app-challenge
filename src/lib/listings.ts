@@ -36,6 +36,12 @@ export const verificationSchema = z
       )
       .max(5),
     notes: z.string().min(10).max(1000),
+    sourceUrl: z
+      .url()
+      .max(2000)
+      .refine((v) => v.startsWith("https://"), "Source URL must use HTTPS")
+      .or(z.literal(""))
+      .optional(),
     eligibilityStatus: z
       .enum(["unrestricted", "restricted", "unknown"])
       .optional(),
@@ -85,6 +91,19 @@ export const providerImportSchema = z
       collectedAt: z.iso.datetime(),
     }),
     verifiedAt: z.iso.datetime().nullable(),
+    verification: z
+      .partialRecord(
+        z.enum(["hours", "offerings", "eligibility", "phone", "coordinates"]),
+        z.object({
+          checkedAt: z.iso.datetime(),
+          method: z.enum(["phone", "official_source", "in_person"]),
+          sourceUrl: z
+            .url()
+            .refine((v) => v.startsWith("https://"))
+            .nullable(),
+        }),
+      )
+      .optional(),
     updatedAt: z.iso.datetime(),
     accessibility: bilingualSchema.nullable(),
   })

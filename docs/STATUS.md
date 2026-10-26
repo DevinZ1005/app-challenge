@@ -1,7 +1,5 @@
 # Development status — 2026-10-18
 
-Update (October 25, 2026): household entry now uses email-code login and Pip’s guided conversation. The local demo is explicitly labeled. [LOGIN_SECURITY_HANDOFF.md](LOGIN_SECURITY_HANDOFF.md) supersedes earlier descriptions of anonymous household entry and lists outstanding production authentication requirements.
-
 This is a working development prototype. All bundled provider records are fictional; real data verification and production setup remain incomplete.
 
 The October 18 startup-readiness audit, completed code additions, prioritized backlog and source research are in [HANDOFF.md](HANDOFF.md). The engineering follow-up is in [AUDIT.md](AUDIT.md), and current executed results are in [VERIFICATION.md](VERIFICATION.md); the verification table below preserves the October 17 baseline. Use `launch-checklist.json` and `npm run readiness` for the current 29-item handoff. Seven manual public-launch gates remain open. SEC-05 is implemented locally; hosted CI (OPS-01) and development lint advisories (SEC-06) remain pending.

@@ -14,6 +14,9 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { AdminTools } from "./admin-tools";
+import { ProviderApplicationReview } from "./provider-application-review";
+import { AccountAccess } from "./account-access";
+import type { AccountRole } from "@/lib/authorization";
 import { useApp } from "./context";
 import type { Provider, FoodOffering, TimeInterval } from "@/lib/model";
 import type { ChangeRequest, AuditEntry } from "@/lib/updates";
@@ -21,7 +24,7 @@ import { updateSchema } from "@/lib/updates";
 interface Account {
   id: string;
   email: string;
-  role: "provider" | "admin";
+  role: AccountRole;
   programIds: string[];
   changes: ChangeRequest[];
   audit: AuditEntry[];
@@ -46,8 +49,16 @@ export function Login() {
         body: JSON.stringify(v),
       });
       if (!r.ok) throw Error();
-      const who = await fetch("/api/auth/me").then((r) => r.json());
-      router.push(who.role === "admin" ? "/admin" : "/provider/dashboard");
+      const accountResponse = await fetch("/api/auth/me");
+      if (!accountResponse.ok) {
+        setError(t.accountUnavailable);
+        return;
+      }
+      const who = await accountResponse.json();
+      if (who.role === "admin") router.push("/admin");
+      else if (who.role === "provider") router.push("/provider/dashboard");
+      else if (who.role === "unaffiliated") router.push("/provider/access");
+      else setError(t.accountUnavailable);
     } catch {
       setError(t.loginError);
     }
@@ -93,6 +104,11 @@ export function Login() {
             <ArrowRight size={17} />
           </button>
         </form>
+        <p>
+          <Link href="/provider/apply" className="text-link">
+            {t.applicationLink}
+          </Link>
+        </p>
         {demoAuth && (
           <div className="notice demo-credentials">
             <strong>{t.demoLogin}</strong>
@@ -529,12 +545,7 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
   function load() {
     fetch("/api/auth/me")
       .then(async (r) => {
-        if (!r.ok)
-          throw Error(
-            r.status === 503
-              ? "Audit or account history unavailable. Reload to retry."
-              : "",
-          );
+        if (!r.ok) throw Error(r.status === 503 ? t.accountUnavailable : "");
         const a = await r.json();
         setAccount(a);
         setAccountError("");
@@ -613,6 +624,8 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
         </Link>
       </section>
     );
+  if (account.role === "unaffiliated")
+    return <AccountAccess email={account.email} />;
   const allowed = providers.filter(
     (p) => account.role === "admin" || account.programIds.includes(p.id),
   );
@@ -637,6 +650,12 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
           <ShieldCheck />
           {t.adminText}
         </div>
+      )}
+      {admin && (
+        <ProviderApplicationReview
+          adminEmail={account.email}
+          onDecision={load}
+        />
       )}
       <div className="dashboard-grid">
         <div>
@@ -786,6 +805,12 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
                     {
                       listing_created: t.listingCreated,
                       verification_recorded: t.verificationRecorded,
+                      provider_application_approved: t.applicationApproved,
+                      provider_application_rejected: t.applicationRejected,
+                      field_evidence_recorded:
+                        locale === "en"
+                          ? "Field evidence recorded"
+                          : "Evidencia de campos registrada",
                       flag_outdated: t.flagOutdated,
                     } as Record<string, string>
                   )[a.action] ||
@@ -802,6 +827,17 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
                   </span>
                 )}
                 {a.notes && <span>{a.notes}</span>}
+                {a.sourceUrl?.startsWith("https://") && (
+                  <a
+                    href={a.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {locale === "en"
+                      ? "Evidence source"
+                      : "Fuente de evidencia"}
+                  </a>
+                )}
               </p>
             ))}
           </div>
