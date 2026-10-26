@@ -21,6 +21,7 @@ export function AdminTools({
   const [fields, setFields] = useState<string[]>([]);
   const [method, setMethod] = useState("official_source");
   const [notes, setNotes] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [eligibilityStatus, setEligibilityStatus] = useState("");
   async function add(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,6 +69,7 @@ export function AdminTools({
       method,
       fields,
       notes,
+      sourceUrl: method === "flag_outdated" ? "" : sourceUrl,
       eligibilityStatus: eligibilityStatus || undefined,
     });
     if (!v.success) {
@@ -299,6 +301,29 @@ export function AdminTools({
                 onChange={(e) => setNotes(e.target.value)}
               />
             </label>
+            {method !== "flag_outdated" && (
+              <div>
+                <label>
+                  {locale === "en"
+                    ? "Public evidence URL (optional)"
+                    : "URL de evidencia pública (opcional)"}
+                  <input
+                    type="url"
+                    pattern="https://.*"
+                    value={sourceUrl}
+                    onChange={(e) => setSourceUrl(e.target.value)}
+                    placeholder="https://"
+                    maxLength={2000}
+                    aria-describedby="verification-source-help"
+                  />
+                </label>
+                <p className="small-text" id="verification-source-help">
+                  {locale === "en"
+                    ? "This link is public. Review notes stay private. Use a source supporting the selected fields; leave blank for phone or in-person evidence without a public page."
+                    : "Este enlace es público. Las notas de revisión son privadas. Usa una fuente que respalde los datos seleccionados; déjalo vacío si no hay una página pública."}
+                </p>
+              </div>
+            )}
             <button className="button secondary small">
               {locale === "en" ? "Record review" : "Registrar revisión"}
             </button>

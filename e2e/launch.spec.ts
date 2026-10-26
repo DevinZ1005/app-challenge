@@ -1,8 +1,4 @@
-import { enterHouseholdDemo } from "./household";
 import { test, expect } from "@playwright/test";
-test.beforeEach(async ({ page }) => {
-  await enterHouseholdDemo(page);
-});
 import AxeBuilder from "@axe-core/playwright";
 
 test("health, security headers, request validation, and private cache controls", async ({

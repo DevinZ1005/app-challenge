@@ -1,7 +1,5 @@
 # PantryFit
 
-The app now opens with email-code sign-in and Pip, a sprout guide who asks the household questions. Local preview uses the labeled demo button. Real email sign-in requires configuration; see [Login security handoff](docs/LOGIN_SECURITY_HANDOFF.md) for setup, launch gates, and a reusable security checklist.
-
 **Food assistance that fits your life.** A functional development prototype for the Congressional App Challenge, starting with the Bronx’s 10468 ZIP code.
 
 PantryFit compares household schedules, travel limits, cooking equipment, refrigeration, and dietary needs with documented services. It explains both compatibility and missing information. No household account is required.
@@ -84,6 +82,8 @@ Next.js + React + strict TypeScript, Tailwind CSS with a custom visual system, L
 - No advertising trackers or household analytics are implemented. Standard hosting access logs may exist.
 
 ## Data and import
+
+Field-by-field public verification, admin review steps, freshness rules, and migration 006 are documented in [docs/FIELD_VERIFICATION.md](docs/FIELD_VERIFICATION.md).
 
 The public demo uses `src/lib/data.ts`. An exported example is in `docs/demo-data.json`. Official source research and a field-by-field verification checklist are in [docs/DATA.md](docs/DATA.md). Reliable sources were identified, but no local listing was independently verified or imported.
 

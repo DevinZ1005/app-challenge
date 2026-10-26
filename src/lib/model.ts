@@ -18,7 +18,6 @@ export const householdSchema = z
       })
       .optional(),
     mode: z.enum(["walking", "transit", "either"]),
-    minMinutes: z.number().int().min(0).max(180).default(0),
     maxMinutes: z.number().int().min(1).max(180),
     availability: z.array(intervalSchema).max(100),
     equipment: z
@@ -30,10 +29,6 @@ export const householdSchema = z
     dietNote: z.string().max(120).default(""),
     strictDiet: z.boolean(),
   })
-  .refine((v) => v.minMinutes <= v.maxMinutes, {
-    path: ["maxMinutes"],
-    message: "The end of the travel range must be at least the start",
-  })
   .refine(
     (v) => !(v.equipment.includes("none") && v.equipment.length > 1),
     "Select no equipment on its own",
@@ -43,7 +38,6 @@ export const defaultPreferences: HouseholdPreferences = {
   zip: "10468",
   landmark: "",
   mode: "walking",
-  minMinutes: 0,
   maxMinutes: 30,
   availability: [],
   equipment: [],
@@ -80,7 +74,15 @@ export interface ServiceProgram {
   eligibility: Bilingual | null;
   eligibilityStatus: "unrestricted" | "restricted" | "unknown";
 }
+export type VerificationField =
+  "hours" | "offerings" | "eligibility" | "phone" | "coordinates";
+export interface FieldVerification {
+  checkedAt: string;
+  method: "phone" | "official_source" | "in_person";
+  sourceUrl: string | null;
+}
 export interface Provider {
+  verification?: Partial<Record<VerificationField, FieldVerification>>;
   id: string;
   organizationId?: string;
   revision?: number;

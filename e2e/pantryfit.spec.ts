@@ -1,8 +1,4 @@
-import { enterHouseholdDemo } from "./household";
 import { test, expect } from "@playwright/test";
-test.beforeEach(async ({ page }) => {
-  await enterHouseholdDemo(page);
-});
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
 });

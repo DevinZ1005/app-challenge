@@ -7,6 +7,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { HttpError } from "./http";
 import { assertRuntimeConfiguration } from "./runtime";
+import {
+  type Identity,
+  requireAdmin,
+  requireProgramAccess,
+  readAuthorizationQuery,
+} from "./authorization";
+export type { Identity } from "./authorization";
 export { HttpError, apiError, readJson } from "./http";
 import { demoProviders } from "./data";
 import type { Provider } from "./model";
@@ -35,13 +42,6 @@ async function sessionSecret() {
 }
 const file =
   process.env.PANTRYFIT_DEMO_FILE || join(tmpdir(), "pantryfit-demo-v1.json");
-export type Identity = {
-  id: string;
-  email: string;
-  role: "provider" | "admin";
-  programIds: string[];
-  token?: string;
-};
 export function supabase(token?: string) {
   assertRuntimeConfiguration();
   if (!url || !anon)
@@ -104,11 +104,14 @@ export async function identity(): Promise<Identity> {
       )
     )
       throw new HttpError(401, "Expired session");
-    const admin = parsed.id.startsWith("admin@");
+    const admin = parsed.id === "admin@demo.pantryfit.test";
     return {
       id: parsed.id,
       email: parsed.id,
       role: admin ? "admin" : "provider",
+      organizationIds: admin
+        ? demoProviders.map((p) => p.organizationId || p.id)
+        : ["demo-garden"],
       programIds: admin ? demoProviders.map((p) => p.id) : ["demo-garden"],
     };
   }
@@ -118,26 +121,47 @@ export async function identity(): Promise<Identity> {
     error,
   } = await client.auth.getUser(token);
   if (error || !user) throw new HttpError(401, "Invalid session");
-  const { data: admin } = await client
-    .from("administrators")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const { data: members } = await client
-    .from("provider_users")
-    .select("provider_id")
-    .eq("user_id", user.id)
-    .eq("approved", true);
-  const ids = (members || []).map((v) => v.provider_id);
-  const { data: programs } = await client
-    .from("service_programs")
-    .select("id")
-    .in("provider_id", ids);
+  const admin = await readAuthorizationQuery(
+    client
+      .from("administrators")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  );
+  const members = await readAuthorizationQuery(
+    client
+      .from("provider_users")
+      .select("provider_id")
+      .eq("user_id", user.id)
+      .eq("approved", true),
+  );
+  if (!Array.isArray(members))
+    throw new HttpError(
+      503,
+      "Account permissions unavailable; try again later",
+    );
+  const ids = [...new Set(members.map((v) => v.provider_id))];
+  const programs = ids.length
+    ? await readAuthorizationQuery(
+        client.from("service_programs").select("id").in("provider_id", ids),
+      )
+    : [];
+  if (!Array.isArray(programs))
+    throw new HttpError(
+      503,
+      "Account permissions unavailable; try again later",
+    );
   return {
     id: user.id,
     email: user.email || "",
-    role: admin ? "admin" : "provider",
-    programIds: (programs || []).map((v) => v.id),
+    role:
+      admin?.user_id === user.id
+        ? "admin"
+        : ids.length
+          ? "provider"
+          : "unaffiliated",
+    organizationIds: ids,
+    programIds: programs.map((v) => v.id),
     token,
   };
 }
@@ -192,6 +216,8 @@ export async function listProviders() {
   return real.length ? real : records;
 }
 export async function dashboard(who: Identity) {
+  if (who.role === "unaffiliated")
+    return { changes: [], audit: [], feedback: [] };
   if (isDemo) {
     await queue;
     const s = await readStore();
@@ -252,13 +278,13 @@ export async function dashboard(who: Identity) {
       method: a.after_data?.method,
       fields: a.after_data?.fields,
       notes: a.after_data?.notes,
+      sourceUrl: a.after_data?.sourceUrl,
     })),
   };
 }
 export async function submitChange(who: Identity, raw: unknown) {
   const p = updateSchema.parse(raw);
-  if (who.role !== "admin" && !who.programIds.includes(p.programId))
-    throw new HttpError(403, "Organization access required");
+  requireProgramAccess(who, p.programId);
   // Provider statements are never independent verification.
   if (p.offerings)
     p.offerings = p.offerings.map((o) => ({ ...o, verified: false }));
@@ -314,8 +340,7 @@ export async function reviewChange(
   status: "approved" | "rejected",
   note: string,
 ) {
-  if (who.role !== "admin")
-    throw new HttpError(403, "Administrator access required");
+  requireAdmin(who);
   if (isDemo)
     return mutate((s) => {
       const c = s.changes.find((v) => v.id === id);
@@ -344,12 +369,18 @@ export async function reviewChange(
         p.phoneVerified = false;
         p.updatedAt = new Date().toISOString();
         p.verifiedAt = null;
+        if (p.verification) {
+          delete p.verification.hours;
+          delete p.verification.offerings;
+          delete p.verification.eligibility;
+        }
         p.revision = (p.revision || 0) + 1;
         for (const sibling of s.providers.filter(
           (v) => (v.organizationId || v.id) === (p.organizationId || p.id),
         )) {
           sibling.phone = p.phone;
           sibling.phoneVerified = false;
+          if (sibling.verification) delete sibling.verification.phone;
           sibling.organizationRevision =
             (sibling.organizationRevision || 0) + 1;
         }
@@ -406,8 +437,7 @@ export function rateLimit(key: string) {
 }
 
 export async function createListing(who: Identity, raw: unknown) {
-  if (who.role !== "admin")
-    throw new HttpError(403, "Administrator access required");
+  requireAdmin(who);
   const v = (isDemo ? listingSchema : realListingSchema).parse(raw);
   if (isDemo)
     return mutate((s) => {
@@ -457,14 +487,21 @@ export async function createListing(who: Identity, raw: unknown) {
   return { id: data };
 }
 export async function verifyListing(who: Identity, raw: unknown) {
-  if (who.role !== "admin")
-    throw new HttpError(403, "Administrator access required");
+  requireAdmin(who);
   const v = verificationSchema.parse(raw);
   if (isDemo)
     return mutate((s) => {
       const p = s.providers.find((p) => p.id === v.programId);
       if (!p) throw new HttpError(404, "Program not found");
       if (v.method === "flag_outdated") {
+        p.verification = {};
+        for (const sibling of s.providers.filter(
+          (item) =>
+            (item.organizationId || item.id) === (p.organizationId || p.id),
+        )) {
+          sibling.phoneVerified = false;
+          if (sibling.verification) delete sibling.verification.phone;
+        }
         p.program.eligibilityStatus = "unknown";
         p.verifiedAt = null;
         p.phoneVerified = false;
@@ -475,6 +512,14 @@ export async function verifyListing(who: Identity, raw: unknown) {
             verified: false,
           }));
       } else {
+        p.verification ??= {};
+        for (const field of v.fields) {
+          p.verification[field] = {
+            checkedAt: new Date().toISOString(),
+            method: v.method,
+            sourceUrl: v.sourceUrl || null,
+          };
+        }
         if (v.fields.includes("eligibility"))
           p.program.eligibilityStatus = v.eligibilityStatus!;
         // Demo records remain fictional; no real-world verification dates or contacts.
@@ -500,6 +545,7 @@ export async function verifyListing(who: Identity, raw: unknown) {
         entityId: v.programId,
         method: v.method,
         fields: v.fields,
+        sourceUrl: v.sourceUrl || null,
         at: new Date().toISOString(),
         changeId: v.programId,
       });
@@ -511,6 +557,7 @@ export async function verifyListing(who: Identity, raw: unknown) {
     fields: v.fields,
     verification_notes: v.notes,
     eligibility_classification: v.eligibilityStatus || null,
+    evidence_source_url: v.sourceUrl || null,
   });
   if (error) throw new HttpError(400, "Verification rejected");
   return { ok: true };

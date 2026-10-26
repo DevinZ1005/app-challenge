@@ -20,6 +20,7 @@ beforeAll(async () => {
     "003_validate_proposals.sql",
     "004_verification_boundaries.sql",
     "005_review_remediation.sql",
+    "006_field_verification.sql",
   ]) {
     const sql = await readFile("supabase/migrations/" + f, "utf8");
     await db.exec(sql.replace("create extension if not exists pgcrypto;", ""));
@@ -348,6 +349,86 @@ async function approve(id: string) {
     [id],
   );
 }
+
+it("publishes field dates and sources without private notes, and invalidates evidence on approval", async () => {
+  await asUser(admin, async () => {
+    // Isolated synthetic real record; no claim about an actual organization.
+    const created = await db.query<{ id: string }>(
+      "select public.create_listing($1) as id",
+      [
+        {
+          name: { en: "Field test", es: "Prueba de campos" },
+          description: { en: "Synthetic only", es: "Solo sintético" },
+          address: { en: "Test address", es: "Dirección de prueba" },
+          zip: "10468",
+          lat: 40.87,
+          lng: -73.89,
+          type: "pantry",
+          sourceName: { en: "Test source", es: "Fuente de prueba" },
+          sourceUrl: "https://example.test/listing",
+          collectedAt: new Date().toISOString(),
+        },
+      ],
+    );
+    const id = created.rows[0].id;
+    const read = async () =>
+      (
+        await db.query<{ document: Provider }>(
+          "select document from public.public_provider_documents where document->>'id'=$1",
+          [id],
+        )
+      ).rows[0].document;
+    const verify = (
+      fields: string[],
+      method = "official_source",
+      source: string | null = "https://example.test/evidence",
+    ) =>
+      db.query(
+        "select public.record_verification($1,$2,$3,'PRIVATE verifier evidence notes','unrestricted',$4)",
+        [id, method, fields, source],
+      );
+    await verify(["hours"]);
+    expect((await read()).verifiedAt).toBeNull();
+    expect((await read()).verification?.hours).toMatchObject({
+      method: "official_source",
+      sourceUrl: "https://example.test/evidence",
+    });
+    await verify(["offerings"]);
+    await verify(["eligibility"]);
+    await verify(["phone", "coordinates"]);
+    expect((await read()).verifiedAt).toBeTruthy();
+    expect(JSON.stringify(await read())).not.toContain("PRIVATE");
+    await expect(
+      verify(["hours"], "official_source", "javascript:alert(1)"),
+    ).rejects.toThrow("HTTPS");
+    await approve(await propose(id));
+    const updated = await read();
+    expect(updated.verification?.hours).toBeUndefined();
+    expect(updated.verification?.offerings).toBeUndefined();
+    expect(updated.verification?.eligibility).toBeUndefined();
+    expect(updated.verification?.phone).toBeUndefined();
+    expect(updated.verification?.coordinates).toBeTruthy();
+    expect(updated.verifiedAt).toBeNull();
+    await verify([], "flag_outdated", null);
+    expect((await read()).verification).toEqual({});
+  });
+});
+
+it("does not grant direct access to the internal verification and review functions", async () => {
+  await asUser(admin, async () => {
+    await expect(
+      db.query(
+        "select public.record_verification_aggregate($1,'phone',array['hours'],'Private internal evidence',null)",
+        [program],
+      ),
+    ).rejects.toThrow();
+    await expect(
+      db.query(
+        "select public.review_change_aggregate(gen_random_uuid(),'approved','Private internal review')",
+      ),
+    ).rejects.toThrow();
+  });
+});
 it.each([
   {
     hours: [

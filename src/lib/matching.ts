@@ -6,6 +6,7 @@ import {
   type MatchResult,
   type Factor,
 } from "./model";
+import { providerVerificationStatus } from "./verification";
 export const weights: Record<Factor, number> = {
   schedule: 30,
   travel: 25,
@@ -113,9 +114,7 @@ export function evaluateTravelCompatibility(
     return evaluation("travel", "unknown", true, true, "missing");
   return evaluation(
     "travel",
-    t.minutes >= h.minMinutes && t.minutes <= h.maxMinutes
-      ? "compatible"
-      : "incompatible",
+    t.minutes <= h.maxMinutes ? "compatible" : "incompatible",
     true,
   );
 }
@@ -253,11 +252,7 @@ export function rankProviders(
         ...evaluateFoodCompatibility(h, provider),
         evaluateEligibility(provider),
       ];
-      const stale =
-        !provider.verifiedAt ||
-        !Number.isFinite(Date.parse(provider.verifiedAt)) ||
-        Date.parse(provider.verifiedAt) > now.getTime() ||
-        now.getTime() - Date.parse(provider.verifiedAt) > 30 * 86400000;
+      const stale = providerVerificationStatus(provider, now) !== "recent";
       const hardFailure = evaluations.some(
         (e) => e.active && e.hard && e.state === "incompatible",
       );

@@ -18,9 +18,8 @@ import {
   ShoppingBasket,
 } from "lucide-react";
 import { useApp } from "./context";
-import { RouteMap } from "./route-map";
-import { PipTips } from "./pip";
 import { rankProviders } from "@/lib/matching";
+import { VerificationSummary } from "./verification-summary";
 import type { MatchResult, MatchExplanation, Provider } from "@/lib/model";
 import type { en } from "@/lib/i18n";
 function reason(e: MatchExplanation, t: typeof en) {
@@ -149,16 +148,7 @@ function MatchCard({ result }: { result: MatchResult }) {
         </div>
         <div>
           <ShieldAlert size={17} />
-          <div>
-            <strong>
-              {p.verifiedAt
-                ? new Intl.DateTimeFormat(locale, {
-                    dateStyle: "medium",
-                  }).format(new Date(p.verifiedAt))
-                : t.notVerified}
-            </strong>
-            <p>{p.verifiedAt ? t.verified : t.confirm}</p>
-          </div>
+          <VerificationSummary provider={p} compact />
         </div>
       </div>
       <div className="score-row">
@@ -241,7 +231,6 @@ export function Results() {
           {t.edit}
         </Link>
       </div>
-      <PipTips />
       <div className="results-layout">
         <aside className="filters">
           <h2>
@@ -303,10 +292,12 @@ export function Results() {
               </button>
             </div>
           </div>
-          <RouteMap
-            providers={suitable.map((r) => r.provider)}
-            expanded={view === "map"}
-          />
+          {view === "map" && (
+            <div className="notice map-notice">
+              <MapPin />
+              {t.mapNote}
+            </div>
+          )}
           {suitable.length ? (
             suitable.map((r) => <MatchCard key={r.provider.id} result={r} />)
           ) : (
@@ -416,7 +407,6 @@ export function ProviderDetail({ id }: { id: string }) {
             <h3>{t.accessibility}</h3>
             <p>{p.accessibility?.[locale] || t.accessibilityUnknown}</p>
           </div>
-          <RouteMap providers={[p]} />
         </div>
         <aside>
           <div className="detail-aside">
@@ -476,12 +466,12 @@ export function ProviderDetail({ id }: { id: string }) {
                 <ExternalLink size={14} />
               </a>
             )}
-            <h3>{t.verified}</h3>
-            <p>
-              {p.verifiedAt
-                ? new Date(p.verifiedAt).toLocaleDateString(locale)
-                : t.notVerified}
-            </p>
+            <h3>
+              {locale === "en"
+                ? "Information checks"
+                : "Revisión de información"}
+            </h3>
+            <VerificationSummary provider={p} />
             <p className="small-text">{t.updateLabel}</p>
           </div>
         </aside>

@@ -11,3 +11,5 @@ test-results
 .tools
 artifacts/*server*.log
 artifacts/*demo.json
+.env.local
+supabase/.temp/

@@ -72,6 +72,7 @@ export interface ChangeRequest {
   reviewNote: string | null;
 }
 export interface AuditEntry {
+  sourceUrl?: string | null;
   id: string;
   actor: string;
   action: string;

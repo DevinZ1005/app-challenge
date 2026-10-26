@@ -10,6 +10,7 @@ const admin = {
   id: "admin@test",
   email: "admin@test",
   role: "admin" as const,
+  organizationIds: [],
   programIds: [],
 };
 beforeAll(async () => {
@@ -45,6 +46,38 @@ async function propose(id: string, phone: string) {
     note: "Explicit demo regression",
   });
 }
+
+it("persists separate simulated checks and keeps existing demo listings fictional", async () => {
+  const id = demoProviders[0].id;
+  await server.verifyListing(admin, {
+    programId: id,
+    method: "official_source",
+    fields: ["hours"],
+    notes: "Private simulated verification notes",
+    sourceUrl: "https://example.test/pantry",
+  });
+  const p = (await server.listProviders()).find((p) => p.id === id)!;
+  expect(p.verification?.hours).toMatchObject({
+    method: "official_source",
+    sourceUrl: "https://example.test/pantry",
+  });
+  expect(p.verification?.hours?.checkedAt).toBeTruthy();
+  expect(p.verification?.offerings).toBeUndefined();
+  expect(p.verifiedAt).toBeNull();
+  expect(p.demo).toBe(true);
+  expect(JSON.stringify(p)).not.toContain("Private simulated");
+  const change = await propose(id, "1111111111");
+  await server.reviewChange(
+    admin,
+    change.id,
+    "approved",
+    "Review test invalidation",
+  );
+  expect(
+    (await server.listProviders()).find((p) => p.id === id)!.verification
+      ?.hours,
+  ).toBeUndefined();
+});
 it("matches SQL stale checks including shared phones and concurrent approvals", async () => {
   const id = demoProviders[0].id;
   const a = await propose(id, "1111111111");

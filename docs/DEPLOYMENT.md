@@ -11,7 +11,7 @@
 
 ## Supabase
 
-1. Create a Supabase project under the team’s account. Apply all files in `supabase/migrations/` in numeric order through `005_review_remediation.sql`. Existing projects apply only unapplied migrations. Migration 004 clears fictional verification claims; 005 adds revision-checked approvals, duplicate schedule validation, and evidence-backed eligibility classification. Existing pending proposals without base revisions must be compared and explicitly resubmitted before approval. Deploy the matching application update with 005: eligibility verification now requires an explicit classification. Inspect migration results before seeding or testing. See [remediation validation](REMEDIATION.md) for execution limits.
+1. Create a Supabase project under the team’s account. Apply all files in `supabase/migrations/` in numeric order through `006_field_verification.sql`. Existing projects apply only unapplied migrations. Migration 004 clears fictional verification claims; 005 adds revision-checked approvals, duplicate schedule validation, and evidence-backed eligibility classification. Existing pending proposals without base revisions must be compared and explicitly resubmitted before approval. Deploy the matching application update with 005: eligibility verification now requires an explicit classification. Inspect migration results before seeding or testing. See [remediation validation](REMEDIATION.md) for execution limits.
 2. Optionally apply `supabase/seed.sql`; it is fictional and must remain labeled demo data.
 3. Create a provider Auth user and administrator Auth user through the trusted Supabase dashboard. Do not make organization associations from public sign-up data.
 4. As a trusted database operator, bootstrap the administrator:

@@ -56,8 +56,6 @@ export function AppContext({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }
   useEffect(() => {
-    if (new URL(window.location.href).searchParams.get("lang") === "es")
-      setLocale("es");
     refresh();
   }, []);
   useEffect(() => {
