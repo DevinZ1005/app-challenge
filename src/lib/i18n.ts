@@ -227,6 +227,31 @@ export const en = {
   providerIntro:
     "Participating organizations can propose updates to hours, food offerings, and contact information. An administrator reviews changes before publication.",
   providerCTA: "Provider sign in",
+  applicationLink: "Apply to represent an organization",
+  applicationTitle: "Apply to join PantryFit",
+  applicationIntro:
+    "Represent a food pantry or food assistance organization? Apply without creating an account. An administrator must independently confirm your affiliation before access can be granted.",
+  applicationOrganization: "Organization name",
+  applicationAddress: "Organization address",
+  applicationContact: "Contact person's name",
+  applicationEmail: "Contact email",
+  applicationPhone: "Contact phone (optional)",
+  applicationWebsite: "Organization website (optional, HTTPS)",
+  applicationDescription: "Short organization description",
+  applicationDescriptionHint:
+    "20–1,000 characters. Describe the food assistance you provide; do not include sensitive personal information.",
+  applicationPrivacy:
+    "Your contact details will be stored privately for administrator review. Applying does not create an account, publish a listing, or grant dashboard access.",
+  applicationSubmit: "Submit application",
+  applicationSubmitting: "Submitting…",
+  applicationSuccessTitle: "Application received for review",
+  applicationSuccess:
+    "If an application for this organization and email is already pending, it remains in the review queue. Your affiliation still needs independent verification. No account or access has been granted.",
+  applicationInvalid: "Check the application fields and try again.",
+  applicationInvalidField: "Check this field and its length or format.",
+  applicationLimited: "Too many submissions. Please wait before trying again.",
+  applicationUnavailable:
+    "Applications are temporarily unavailable. Your entries are still here; please try again later.",
   accessText:
     "To request access to a real listing, contact the student team through their verified project contact. Association with an organization must be independently approved. No real organizations are onboarded in this demo.",
   loginTitle: "Welcome back.",
@@ -516,6 +541,32 @@ export const es: typeof en = {
   providerIntro:
     "Las organizaciones pueden proponer cambios a horarios, alimentos y datos de contacto. Un administrador revisa los cambios antes de publicarlos.",
   providerCTA: "Acceso para proveedores",
+  applicationLink: "Solicitar representar a una organización",
+  applicationTitle: "Solicita unirte a PantryFit",
+  applicationIntro:
+    "¿Representas una despensa o una organización de asistencia alimentaria? Solicita acceso sin crear una cuenta. Un administrador debe confirmar tu afiliación de forma independiente antes de conceder acceso.",
+  applicationOrganization: "Nombre de la organización",
+  applicationAddress: "Dirección de la organización",
+  applicationContact: "Nombre de la persona de contacto",
+  applicationEmail: "Correo electrónico de contacto",
+  applicationPhone: "Teléfono de contacto (opcional)",
+  applicationWebsite: "Sitio web de la organización (opcional, HTTPS)",
+  applicationDescription: "Descripción breve de la organización",
+  applicationDescriptionHint:
+    "Entre 20 y 1.000 caracteres. Describe la asistencia alimentaria que ofrecen; no incluyas información personal sensible.",
+  applicationPrivacy:
+    "Tus datos de contacto se guardarán de forma privada para revisión administrativa. La solicitud no crea una cuenta, publica un registro ni concede acceso al panel.",
+  applicationSubmit: "Enviar solicitud",
+  applicationSubmitting: "Enviando…",
+  applicationSuccessTitle: "Solicitud recibida para revisión",
+  applicationSuccess:
+    "Si ya hay una solicitud pendiente para esta organización y correo electrónico, permanece en la cola de revisión. Tu afiliación aún necesita verificación independiente. No se ha creado una cuenta ni concedido acceso.",
+  applicationInvalid: "Revisa los datos de la solicitud e inténtalo de nuevo.",
+  applicationInvalidField: "Revisa este campo y su longitud o formato.",
+  applicationLimited:
+    "Demasiadas solicitudes. Espera antes de volver a intentarlo.",
+  applicationUnavailable:
+    "Las solicitudes no están disponibles temporalmente. Tus datos siguen aquí; inténtalo más tarde.",
   accessText:
     "Para solicitar acceso a un registro real, contacta al equipo estudiantil por su contacto verificado. La asociación debe aprobarse de forma independiente. Este ejemplo no incluye organizaciones reales.",
   loginTitle: "Te damos la bienvenida.",

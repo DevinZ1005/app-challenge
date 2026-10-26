@@ -103,6 +103,11 @@ export function Login() {
             <ArrowRight size={17} />
           </button>
         </form>
+        <p>
+          <Link href="/provider/apply" className="text-link">
+            {t.applicationLink}
+          </Link>
+        </p>
         {demoAuth && (
           <div className="notice demo-credentials">
             <strong>{t.demoLogin}</strong>

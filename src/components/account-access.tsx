@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useApp } from "./context";
 
 export function AccountAccess({ email }: { email: string }) {
@@ -24,6 +25,11 @@ export function AccountAccess({ email }: { email: string }) {
         {t.signedIn} {email}
       </p>
       <p>{t.unaffiliatedText}</p>
+      <p>
+        <Link href="/provider/apply" className="text-link">
+          {t.applicationLink}
+        </Link>
+      </p>
       <button className="button secondary" onClick={logout}>
         {t.logout}
       </button>
