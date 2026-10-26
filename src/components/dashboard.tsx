@@ -14,6 +14,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { AdminTools } from "./admin-tools";
+import { ProviderApplicationReview } from "./provider-application-review";
 import { AccountAccess } from "./account-access";
 import type { AccountRole } from "@/lib/authorization";
 import { useApp } from "./context";
@@ -650,6 +651,12 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
           {t.adminText}
         </div>
       )}
+      {admin && (
+        <ProviderApplicationReview
+          adminEmail={account.email}
+          onDecision={load}
+        />
+      )}
       <div className="dashboard-grid">
         <div>
           <label>
@@ -798,6 +805,8 @@ export function Dashboard({ admin = false }: { admin?: boolean }) {
                     {
                       listing_created: t.listingCreated,
                       verification_recorded: t.verificationRecorded,
+                      provider_application_approved: t.applicationApproved,
+                      provider_application_rejected: t.applicationRejected,
                       field_evidence_recorded:
                         locale === "en"
                           ? "Field evidence recorded"

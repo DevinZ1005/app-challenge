@@ -228,6 +228,50 @@ export const en = {
     "Participating organizations can propose updates to hours, food offerings, and contact information. An administrator reviews changes before publication.",
   providerCTA: "Provider sign in",
   applicationLink: "Apply to represent an organization",
+  reviewApplicationsTitle: "Provider applications",
+  reviewStatusFilter: "Filter applications by status",
+  reviewAll: "All statuses",
+  reviewSubmitted: "Submitted",
+  reviewOpen: "View application",
+  reviewEmpty: "No applications match this filter.",
+  reviewUnavailable:
+    "Application review is temporarily unavailable. Please try again later.",
+  reviewRefresh: "Refresh applications",
+  reviewPrevious: "Previous page",
+  reviewNext: "Next page",
+  reviewPage: "Page",
+  reviewClose: "Close application",
+  reviewBy: "Reviewed by",
+  reviewAt: "Reviewed at",
+  reviewReason: "Review reason (10–2,000 characters)",
+  reviewFinal:
+    "This decision is final for this application. It cannot be reviewed again.",
+  reviewNoAccess:
+    "Approval records affiliation only. It creates no account, invitation, organization membership, or dashboard access.",
+  reviewSelf: "A different administrator must review your own application.",
+  reviewApproveTitle: "Approve this application?",
+  reviewRejectTitle: "Reject this application?",
+  reviewConfirmApprove: "Confirm approval",
+  reviewConfirmReject: "Confirm rejection",
+  reviewInvalid:
+    "Check the review reason and all required independent verification fields.",
+  reviewConflict:
+    "Another decision was recorded. Reload the application to see it.",
+  reviewForbidden:
+    "Administrator permission and an independent reviewer are required.",
+  reviewSaved: "Decision recorded. No account or access was created.",
+  reviewOfficialSource: "Official contact source URL (HTTPS)",
+  reviewContactMethod: "Independent contact method",
+  reviewPhone: "Phone call",
+  reviewEmail: "Email",
+  reviewOfficialContact: "Official phone or email contacted",
+  reviewContactTime: "Contacted at (your local time)",
+  reviewEvidenceHint:
+    "Find the organization's official contact independently. Contact the organization to confirm this applicant's authority; do not rely on the applicant's email or claims alone.",
+  reviewAttestation:
+    "I independently contacted the organization and confirmed this applicant is authorized to represent it.",
+  applicationApproved: "Provider application approved",
+  applicationRejected: "Provider application rejected",
   applicationTitle: "Apply to join PantryFit",
   applicationIntro:
     "Represent a food pantry or food assistance organization? Apply without creating an account. An administrator must independently confirm your affiliation before access can be granted.",
@@ -542,6 +586,51 @@ export const es: typeof en = {
     "Las organizaciones pueden proponer cambios a horarios, alimentos y datos de contacto. Un administrador revisa los cambios antes de publicarlos.",
   providerCTA: "Acceso para proveedores",
   applicationLink: "Solicitar representar a una organización",
+  reviewApplicationsTitle: "Solicitudes de proveedores",
+  reviewStatusFilter: "Filtrar solicitudes por estado",
+  reviewAll: "Todos los estados",
+  reviewSubmitted: "Enviada",
+  reviewOpen: "Ver solicitud",
+  reviewEmpty: "No hay solicitudes con este filtro.",
+  reviewUnavailable:
+    "La revisión de solicitudes no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+  reviewRefresh: "Actualizar solicitudes",
+  reviewPrevious: "Página anterior",
+  reviewNext: "Página siguiente",
+  reviewPage: "Página",
+  reviewClose: "Cerrar solicitud",
+  reviewBy: "Revisada por",
+  reviewAt: "Fecha de revisión",
+  reviewReason: "Motivo de la decisión (10–2.000 caracteres)",
+  reviewFinal:
+    "Esta decisión es definitiva para esta solicitud. No se puede revisar de nuevo.",
+  reviewNoAccess:
+    "La aprobación solo registra la afiliación. No crea una cuenta, invitación, membresía ni acceso al panel.",
+  reviewSelf: "Otro administrador debe revisar tu propia solicitud.",
+  reviewApproveTitle: "¿Aprobar esta solicitud?",
+  reviewRejectTitle: "¿Rechazar esta solicitud?",
+  reviewConfirmApprove: "Confirmar aprobación",
+  reviewConfirmReject: "Confirmar rechazo",
+  reviewInvalid:
+    "Revisa el motivo y todos los campos de verificación independiente requeridos.",
+  reviewConflict:
+    "Ya se registró otra decisión. Vuelve a cargar la solicitud para verla.",
+  reviewForbidden:
+    "Se requieren permisos de administrador y un revisor independiente.",
+  reviewSaved:
+    "Decisión registrada. No se creó una cuenta ni se concedió acceso.",
+  reviewOfficialSource: "URL de la fuente oficial del contacto (HTTPS)",
+  reviewContactMethod: "Método de contacto independiente",
+  reviewPhone: "Llamada telefónica",
+  reviewEmail: "Correo electrónico",
+  reviewOfficialContact: "Teléfono o correo oficial contactado",
+  reviewContactTime: "Fecha de contacto (tu hora local)",
+  reviewEvidenceHint:
+    "Busca el contacto oficial de la organización de forma independiente. Contacta a la organización para confirmar la autoridad del solicitante; no te bases solo en su correo o sus declaraciones.",
+  reviewAttestation:
+    "Contacté a la organización de forma independiente y confirmé que esta persona está autorizada para representarla.",
+  applicationApproved: "Solicitud de proveedor aprobada",
+  applicationRejected: "Solicitud de proveedor rechazada",
   applicationTitle: "Solicita unirte a PantryFit",
   applicationIntro:
     "¿Representas una despensa o una organización de asistencia alimentaria? Solicita acceso sin crear una cuenta. Un administrador debe confirmar tu afiliación de forma independiente antes de conceder acceso.",

@@ -2708,7 +2708,7 @@ pre {
     font-size: 32px;
   }
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .dashboard-grid .detail-block {
     padding: 23px 18px;
