@@ -20,6 +20,7 @@ import {
 import { useApp } from "./context";
 import { rankProviders } from "@/lib/matching";
 import { VerificationSummary } from "./verification-summary";
+import { DirectionsLink } from "./directions-link";
 import type { MatchResult, MatchExplanation, Provider } from "@/lib/model";
 import type { en } from "@/lib/i18n";
 function reason(e: MatchExplanation, t: typeof en) {
@@ -115,6 +116,7 @@ function MatchCard({ result }: { result: MatchResult }) {
             <MapPin size={15} />
             {p.address[locale]}
           </p>
+          <DirectionsLink provider={p} />
         </div>
         <span className={"match-badge " + result.category}>
           {result.category === "strong" ? (
@@ -356,6 +358,7 @@ export function ProviderDetail({ id }: { id: string }) {
           <MapPin size={17} />
           {p.address[locale]}
         </p>
+        <DirectionsLink provider={p} className="button" />
       </div>
       {(result.stale || p.demo) && (
         <div className="notice warning-notice">
@@ -432,20 +435,8 @@ export function ProviderDetail({ id }: { id: string }) {
                 ))}
               </ul>
             )}
-            <hr />
-            {!p.demo && p.coordinatesVerified ? (
-              <a
-                className="button full"
-                href={`https://www.openstreetmap.org/directions?to=${p.coordinates.lat},${p.coordinates.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t.directions}
-                <ExternalLink size={16} />
-              </a>
-            ) : (
-              <p className="notice">{t.noDirections}</p>
-            )}
+            {(p.demo || !!(p.phoneVerified && p.phone)) && <hr />}
+            {p.demo && <p className="notice">{t.noDirections}</p>}
             {p.phoneVerified && p.phone && !p.demo && (
               <a className="button secondary full" href={"tel:" + p.phone}>
                 <Phone size={16} />

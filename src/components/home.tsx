@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useApp } from "./context";
 import { Neighborhood } from "./neighborhood";
+import { DirectionsLink } from "./directions-link";
 export function Home() {
   const { t, locale, providers, demo } = useApp();
   return (
@@ -122,18 +123,18 @@ export function Home() {
           {providers.slice(0, 3).map((p, i) => {
             const Icon = [ShoppingBasket, Utensils, Leaf][i];
             return (
-              <Link
-                href={"/providers/" + p.id}
-                className="preview-card"
-                key={p.id}
-              >
-                <div className={"preview-art art-" + i}>
+              <article className="preview-card" key={p.id}>
+                <Link
+                  href={"/providers/" + p.id}
+                  aria-label={p.name[locale]}
+                  className={"preview-art art-" + i}
+                >
                   <div className="art-circle" />
                   <Icon size={64} strokeWidth={1.3} />
                   {p.demo && <span className="card-demo">{t.fictional}</span>}
                   <div className="art-leaf one" />
                   <div className="art-leaf two" />
-                </div>
+                </Link>
                 <div className="preview-content">
                   <span className="service-type">
                     {p.program.type === "community"
@@ -141,13 +142,14 @@ export function Home() {
                       : t[p.program.type]}
                   </span>
                   <h3>
-                    {p.name[locale]}
+                    <Link href={"/providers/" + p.id}>{p.name[locale]}</Link>
                     <ArrowUpRight size={19} />
                   </h3>
                   <p>
                     <MapPin size={14} />
                     {p.address[locale]}
                   </p>
+                  <DirectionsLink provider={p} />
                   <div className="card-divider" />
                   <span className="food-tag">
                     <Check size={14} />
@@ -160,7 +162,7 @@ export function Home() {
                       : t.unknownFood}
                   </span>
                 </div>
-              </Link>
+              </article>
             );
           })}
         </div>

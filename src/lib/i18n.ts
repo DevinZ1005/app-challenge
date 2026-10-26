@@ -180,7 +180,7 @@ export const en = {
   offerings: "Food offerings",
   accessibility: "Accessibility",
   accessibilityUnknown: "Accessibility information has not been confirmed.",
-  directions: "Get directions",
+  directions: "Get Directions",
   noDirections: "Directions are disabled for fictional locations.",
   call: "Call provider",
   backResults: "Back to results",
@@ -340,7 +340,7 @@ export const en = {
   privacyText:
     "You can search without an account. Household answers and approximate location stay in page memory and are cleared when you close or refresh this tab. We do not collect names, income, immigration status, household profiles, or advertising analytics. Your preferences are never sent to providers.",
   privacyMore:
-    "Optional geolocation requires browser permission. Directions to real, verified providers open OpenStreetMap and are subject to its privacy policy. Provider accounts use authenticated sessions. Demo sessions use an HTTP-only cookie; their fictional updates are saved on this server for demonstration. Hosting services may retain standard access logs. Do not enter sensitive information in feedback or provider notes.",
+    "Optional geolocation requires browser permission. Directions links send the service's public address to Google Maps and are subject to Google's privacy policy. PantryFit does not request your location to open directions. Provider accounts use authenticated sessions. Demo sessions use an HTTP-only cookie; their fictional updates are saved on this server for demonstration. Hosting services may retain standard access logs. Do not enter sensitive information in feedback or provider notes.",
   aboutTitle: "Built with care. Still being built.",
   aboutText:
     "PantryFit is a development prototype for a student Congressional App Challenge project, initially focused on ZIP code 10468. Practical access barriers are hypotheses for local research, not established statistics about this neighborhood. No partnerships, interviews, or community impact are claimed.",
@@ -701,7 +701,7 @@ export const es: typeof en = {
   privacyText:
     "Puedes buscar sin cuenta. Tus respuestas y ubicación aproximada se guardan en la memoria de la página y se borran al cerrar o recargar. No recopilamos nombres, ingresos, estatus migratorio, perfiles del hogar ni datos publicitarios. No enviamos tus preferencias a los proveedores.",
   privacyMore:
-    "La geolocalización requiere permiso. Las indicaciones a proveedores reales verificados abren OpenStreetMap y están sujetas a su política. Las cuentas de proveedores usan sesiones autenticadas. Las sesiones de ejemplo usan una cookie HTTP-only; los cambios ficticios se guardan en el servidor para la demostración. El alojamiento puede guardar registros de acceso estándar. No incluyas información sensible en comentarios o notas.",
+    "La geolocalización requiere permiso. Los enlaces de cómo llegar envían la dirección pública del servicio a Google Maps y están sujetos a la política de privacidad de Google. PantryFit no solicita tu ubicación para abrir las indicaciones. Las cuentas de proveedores usan sesiones autenticadas. Las sesiones de ejemplo usan una cookie HTTP-only; los cambios ficticios se guardan en el servidor para la demostración. El alojamiento puede guardar registros de acceso estándar. No incluyas información sensible en comentarios o notas.",
   aboutTitle: "Hecho con cuidado. Aún en desarrollo.",
   aboutText:
     "PantryFit es un prototipo para un proyecto estudiantil del Congressional App Challenge, centrado inicialmente en 10468. Las barreras prácticas son hipótesis para investigación local, no estadísticas comprobadas del vecindario. No se afirman alianzas, entrevistas ni impacto comunitario.",
