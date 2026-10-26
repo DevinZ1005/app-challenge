@@ -48,7 +48,7 @@
     "prettier": "^3.9.10",
     "supabase": "2.122.0",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
   "type": "module",
