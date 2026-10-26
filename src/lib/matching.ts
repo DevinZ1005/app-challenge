@@ -114,7 +114,9 @@ export function evaluateTravelCompatibility(
     return evaluation("travel", "unknown", true, true, "missing");
   return evaluation(
     "travel",
-    t.minutes <= h.maxMinutes ? "compatible" : "incompatible",
+    t.minutes >= h.minMinutes && t.minutes <= h.maxMinutes
+      ? "compatible"
+      : "incompatible",
     true,
   );
 }
