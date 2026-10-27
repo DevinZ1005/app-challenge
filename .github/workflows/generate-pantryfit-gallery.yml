@@ -1,0 +1,93 @@
+name: Generate more PantryFit cover options
+on:
+  push:
+    branches: [pantryfit-cover-photo]
+    paths:
+      - .github/workflows/generate-pantryfit-gallery.yml
+permissions:
+  contents: write
+jobs:
+  gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pantryfit-cover-photo
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install application and screenshot dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          python -m pip install Pillow
+      - name: Start the fictional PantryFit demo
+        run: |
+          nohup npx next dev --hostname 127.0.0.1 --port 3103 > /tmp/pantryfit-gallery.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:3103/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/pantryfit-gallery.log
+          exit 1
+      - name: Capture actual UI pages using Playwright
+        run: |
+          mkdir -p artifacts/gallery
+          node --input-type=module <<'JS'
+          import { chromium } from '@playwright/test';
+          const browser = await chromium.launch({headless:true});
+          const context = await browser.newContext({viewport:{width:600,height:800},deviceScaleFactor:1,locale:'en-US',reducedMotion:'reduce'});
+          const pages = [
+            ['Home','/'],
+            ['Food-Finder','/find'],
+            ['Matching-Results','/results'],
+            ['How-It-Works','/how-it-works'],
+            ['For-Providers','/for-providers']
+          ];
+          for (const [label,path] of pages) {
+            const p = await context.newPage();
+            await p.goto('http://127.0.0.1:3103'+path,{waitUntil:'networkidle',timeout:120000});
+            await p.waitForTimeout(600);
+            await p.screenshot({path:'artifacts/gallery/'+label+'-full.png',fullPage:true,animations:'disabled'});
+            console.log(label,(await p.title()),(await p.locator('h1').first().textContent())?.trim());
+            await p.close();
+          }
+          await browser.close();
+          JS
+      - name: Export four 600x800 JPEG cover choices and contact sheet
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          from pathlib import Path
+          out=Path('artifacts/gallery')
+          names=['Home','Food-Finder','Matching-Results','How-It-Works','For-Providers']
+          covers=[]
+          for name in names:
+              src=Image.open(out/(name+'-full.png')).convert('RGB')
+              if src.size[0]!=600: raise ValueError((name,src.size))
+              # Top-of-page authentic screenshot, with no UI elements invented or altered.
+              image=Image.new('RGB',(600,800),'#fbfaf5')
+              clipped=src.crop((0,0,600,min(800,src.height)))
+              image.paste(clipped,(0,0))
+              image.save(out/('PantryFit-'+name+'.jpg'),'JPEG',quality=95,subsampling=0,optimize=True)
+              covers.append((name,image))
+          # Simple selection sheet made from the same original app screenshots.
+          sheet=Image.new('RGB',(1440,1340),'#f3f5ef')
+          d=ImageDraw.Draw(sheet)
+          for i,(name,img) in enumerate(covers):
+              x=50+(i%3)*470; y=50+(i//3)*640
+              thumb=img.resize((390,520),Image.Resampling.LANCZOS)
+              sheet.paste(thumb,(x,y+35))
+              d.text((x,y+8),name.replace('-',' '),fill='#153a2e')
+          sheet.save(out/'PantryFit-Options.jpg','JPEG',quality=92,optimize=True)
+          print('Covers:',[(str(out/('PantryFit-'+n+'.jpg')),(out/('PantryFit-'+n+'.jpg')).stat().st_size) for n in names])
+          PY
+      - name: Save the cover choices to the existing cover-photo branch
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add artifacts/gallery
+          git diff --cached --quiet || git commit -m "Add five authentic PantryFit screenshots and competition cover options [skip ci]"
+          git push
