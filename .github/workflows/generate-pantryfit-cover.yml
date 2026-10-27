@@ -1,0 +1,50 @@
+name: Export PantryFit Congressional App Challenge cover
+on:
+  push:
+    branches: [pantryfit-cover-photo]
+    paths:
+      - .github/workflows/generate-pantryfit-cover.yml
+permissions:
+  contents: write
+jobs:
+  create-cover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pantryfit-cover-photo
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pillow
+        run: python -m pip install Pillow
+      - name: Create cover from authentic PantryFit mobile screenshot
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          src = Image.open('artifacts/home-mobile.png').convert('RGB')
+          assert src.width == 390, f'Unexpected source dimensions: {src.size}'
+          dest = Image.new('RGB',(600,800),'#fbfaf6')
+
+          # Only real UI sections are used: navigation logo, hero headline,
+          # and a central portion of the illustrated map graphic.
+          def section(box,top,height):
+              part=src.crop(box)
+              target_w=600
+              part=part.resize((target_w,height), Image.Resampling.LANCZOS)
+              dest.paste(part,(0,top))
+          section((0,0,390,73),0,112)
+          section((0,177,390,392),112,330)
+          section((0,730,390,964),442,358)
+          out=Path('artifacts/PantryFit-Cover.jpg')
+          dest.save(out,format='JPEG',quality=94,subsampling=0,optimize=True)
+          print('Exported',out,dest.size,out.stat().st_size)
+          PY
+      - name: Commit image to cover-photo branch
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add artifacts/PantryFit-Cover.jpg
+          git diff --cached --quiet || git commit -m "Add 600x800 PantryFit CAC cover photo [skip ci]"
+          git push
