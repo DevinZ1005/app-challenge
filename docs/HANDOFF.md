@@ -78,7 +78,7 @@ Record aggregate task success, failure reason, time to useful result, freshness 
 
 For capacity, load-test the agreed pilot peak plus a reasonable buffer against staging using synthetic data, and record p95 latency, error rate, database connections and estimated spend. Set a capacity limit from observed results. Measure mobile performance on the production build; field Web Vitals require real traffic and a separate privacy-reviewed collection decision.
 
-## Handoff protocol for the next engineer or coding agent
+## Engineering handoff
 
 1. Read this file, `launch-checklist.json`, `VERIFICATION.md`, `SECURITY.md`, `OPERATIONS.md` and applicable repository instructions. Inspect current code before trusting any status. Never treat a prior report as proof for changed code.
 2. Run `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high`, `npx playwright install chromium`, `npm run test:e2e`, and `npm run test:production`. Run `npm run test:a11y` with a local demo server for the additional authenticated/questionnaire states. Use an isolated fictional dataset.
@@ -86,5 +86,3 @@ For capacity, load-test the agreed pilot peak plus a reasonable buffer against s
 4. Keep evidence and verification date current. Record actual commands/results and environment limitations in `VERIFICATION.md`. A new manual release decision needs durable staging/test evidence, not a changed checklist label.
 5. For work needing project access, real data, contacts or human review, record the exact dependency, owner and acceptance evidence. Never fabricate verified listings, legal policies, credentials, monitoring configuration or approvals.
 6. Run `npm run readiness:release`. It must currently fail because public-launch evidence is incomplete. Fix all listed blockers, rerun full checks, and obtain founder go/no-go before changing the launch decision. The checker never grants release approval.
-
-Suggested next-agent instruction: “Act as PantryFit's engineering owner. Follow docs/HANDOFF.md, audit every requirement in docs/launch-checklist.json against current code, implement missing applicable capabilities with regression coverage, and update evidence and verification results. Preserve anonymous household privacy and fictional labels. Report unresolved external dependencies honestly. Do not mark manual launch gates complete without recorded evidence.”

@@ -93,7 +93,6 @@ Fix items 1–2 before onboarding real providers. Address items 3–7 before pub
 - Existing Vitest suite: **55 tests passed across 6 files**.
 - TypeScript `--noEmit`: **passed**. ESLint: **passed**.
 - Additional isolated PGlite checks reproduced duplicate-approval failures, stale-proposal overwrite, and unchanged eligibility classification after verification. The reproduction script is local at `.cache/review-repro.mjs` (ignored by Git).
-- npm was absent from shell PATH; checks used the bundled Node executable and installed dependencies directly. The first Vitest attempt failed before test execution because its temporary cache could not be renamed. Redirecting TEMP/TMP to `.cache/review-temp` resolved that environment issue.
 - No production build, browser suite, live Supabase integration, deployment check, or fresh dependency vulnerability audit was performed for this review. Existing documentation's audit results were not independently revalidated.
 
 Implement new migrations for deployed SQL changes rather than rewriting applied migrations. Start with versioned approvals and the empty-directory flow, then align proposal validation, eligibility verification, and evidence retrieval. Finish the form boundary fixes and run focused regression tests plus the existing suite and browser workflow against both demo mode and a credential-backed test Supabase project.
